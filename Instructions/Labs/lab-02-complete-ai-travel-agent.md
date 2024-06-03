@@ -15,7 +15,7 @@ lab:
 
 ## 목표
 
-이 랩을 완료하면 다음 사항을 달성할 수 있습니다.
+이 랩을 완료하면 다음을 달성할 수 있습니다.
 
 * LLM(대규모 언어 모델) 서비스에 대한 엔드포인트 만들기
 * 의미 체계 커널 개체 빌드
@@ -27,7 +27,7 @@ lab:
 
 ### 필수 조건
 
-연습을 완료하려면 시스템에 다음을 설치해야 합니다.
+연습을 완료하려면 시스템에 다음이 설치되어어 있어야 합니다.
 
 * [Visual Studio Code](https://code.visualstudio.com)
 * [최신 .NET 7.0 SDK](https://dotnet.microsoft.com/download/dotnet/7.0)
@@ -38,27 +38,15 @@ lab:
 이러한 연습을 위해 시작 프로젝트를 사용할 수 있습니다. 시작 프로젝트를 설정하려면 다음 단계를 따릅니다.
 
 > [!IMPORTANT]
-> 이 단계를 완료하려면 .NET Framework 8.0이 설치되어 있고 Github 계정이 있어야 합니다.
+> .NET Framework 8.0과 C#용 VS Code 확장 및 NuGet 패키지 관리자가 설치되어 있어야 합니다.
 
-1. Visual Studio Code를 엽니다.
+1. `https://github.com/MicrosoftLearning/AZ-2005-Develop-AI-agents-OpenAI-Semantic-Kernel-SDK/blob/master/Allfiles/Labs/02/Lab-02-Starter.zip`에 있는 Zip 파일을 다운로드합니다.
 
-1. Visual Studio Code **시작** 섹션에서 **Git 리포지토리 복제**를 선택합니다.
+1. 데스크톱의 폴더와 같이 쉽게 찾고 기억할 수 있는 위치에 Zip 파일의 콘텐츠를 추출합니다.
 
-1. URL 표시줄에 `https://github.com/MicrosoftLearning/MSLearn-Develop-AI-Agents-with-Azure-OpenAI-and-Semantic-Kernel-SDK.git`를 입력합니다.
+1. Visual Studio Code를 열고 **파일** > **폴더 열기**를 선택합니다.
 
-1. 파일 탐색기에서 바탕 화면의 폴더와 같이 쉽게 찾고 기억할 수 있는 위치에 새 폴더를 만듭니다.
-
-1. **리포지토리 대상으로 선택** 단추를 클릭합니다.
-
-    프로젝트를 성공적으로 복제하려면 GitHub에 로그인해야 합니다.
-
-1. Visual Studio Code에서 프로젝트를 엽니다.
-
-1. 탐색기에서 **Lab01-create-music-recommendations-agent/Lab01-Project** 폴더를 마우스 오른쪽 단추로 클릭하고 **통합 터미널에서 열기**를 클릭합니다.
-
-1. **Lab01-create-music-recommendations-agent/Lab01-Project** 폴더를 확장합니다.
-
-    "Program.cs" 파일이 표시됩니다.
+1. 추출한 **시작** 폴더로 이동하여 **폴더 선택**을 선택합니다.
 
 1. 코드 편집기에서 **Program.cs** 파일을 엽니다.
 
@@ -97,7 +85,7 @@ lab:
 
     다음 작업에서 이러한 값을 사용하여 커널을 빌드합니다. 키를 비공개로 안전하게 유지해야 합니다!
 
-1. Visual Studio Code에서 **Program.cs** 파일을 엽니다.
+1. Visual Studio Code의 **Program.cs** 파일로 돌아갑니다.
 
 1. Azure Open AI Services 배포 이름, API 키, 엔드포인트로 다음 변수 업데이트
 

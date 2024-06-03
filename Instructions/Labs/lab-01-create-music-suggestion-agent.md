@@ -39,27 +39,15 @@ lab:
 이러한 연습을 위해 시작 프로젝트를 사용할 수 있습니다. 시작 프로젝트를 설정하려면 다음 단계를 따릅니다.
 
 > [!IMPORTANT]
-> 이 단계를 완료하려면 .NET Framework 8.0이 설치되어 있고 Github 계정이 있어야 합니다.
+> .NET Framework 8.0과 C#용 VS Code 확장 및 NuGet 패키지 관리자가 설치되어 있어야 합니다.
 
-1. Visual Studio Code를 엽니다.
+1. `https://github.com/MicrosoftLearning/AZ-2005-Develop-AI-agents-OpenAI-Semantic-Kernel-SDK/blob/master/Allfiles/Labs/01/Lab-01-Starter.zip`에 있는 Zip 파일을 다운로드합니다.
 
-1. Visual Studio Code **시작** 섹션에서 **Git 리포지토리 복제**를 선택합니다.
+1. 데스크톱의 폴더와 같이 쉽게 찾고 기억할 수 있는 위치에 Zip 파일의 콘텐츠를 추출합니다.
 
-1. URL 표시줄에 `https://github.com/MicrosoftLearning/MSLearn-Develop-AI-Agents-with-Azure-OpenAI-and-Semantic-Kernel-SDK.git`를 입력합니다.
+1. Visual Studio Code를 열고 **파일** > **폴더 열기**를 선택합니다.
 
-1. 파일 탐색기에서 바탕 화면의 폴더와 같이 쉽게 찾고 기억할 수 있는 위치에 새 폴더를 만듭니다.
-
-1. **리포지토리 대상으로 선택** 단추를 클릭합니다.
-
-    프로젝트를 성공적으로 복제하려면 GitHub에 로그인해야 합니다.
-
-1. Visual Studio Code에서 프로젝트를 엽니다.
-
-1. 탐색기에서 **Lab01-create-music-recommendations-agent/Lab01-Project** 폴더를 마우스 오른쪽 단추로 클릭하고 **통합 터미널에서 열기**를 클릭합니다.
-
-1. **Lab01-create-music-recommendations-agent/Lab01-Project** 폴더를 확장합니다.
-
-    "Program.cs" 파일이 표시됩니다.
+1. 추출한 **시작** 폴더로 이동하여 **폴더 선택**을 선택합니다.
 
 1. 코드 편집기에서 **Program.cs** 파일을 엽니다.
 
@@ -102,19 +90,9 @@ lab:
 
 이 연습에서는 첫 번째 의미 체계 커널 SDK 프로젝트를 빌드하는 방법을 알아봅니다. 새 프로젝트를 만들고, 의미 체계 커널 SDK NuGet 패키지를 추가하고, 의미 체계 커널 SDK에 대한 참조를 추가하는 방법을 알아봅니다. 그럼 시작하겠습니다.
 
-1. Visual Studio Code를 엽니다.
+1. Visual Studio Code 프로젝트로 돌아갑니다.
 
-1. 탐색기에서 **Lab01-create-music-recommendations-agent/Lab01-Project** 폴더를 마우스 오른쪽 단추로 클릭하고 **통합 터미널에서 열기**를 클릭합니다.
-
-1. **Lab01-create-music-recommendations-agent/Lab01-Project** 폴더를 확장합니다.
-
-    "Program.cs" 파일이 표시됩니다.
-
-1. 코드 편집기에서 **Program.cs** 파일을 엽니다.
-
-1. 프로젝트 디렉터리에서 터미널을 엽니다.
-
-    프로젝트 폴더를 마우스 오른쪽 단추로 클릭하고 "통합 터미널에서 열기"를 선택하여 터미널을 열 수 있습니다.
+1. **터미널** > **새 터미널**을 선택하여 터미널을 엽니다.
 
 1. 터미널에서 다음 명령을 실행하여 의미 체계 커널 SDK를 설치합니다.
 
@@ -198,7 +176,7 @@ lab:
         // Read the existing content from the file
         string filePath = "Files/RecentlyPlayed.txt";
         string jsonContent = File.ReadAllText(filePath);
-        var RecentlyPlayed = (JsonArray) JsonNode.Parse(jsonContent);
+        var recentlyPlayed = (JsonArray) JsonNode.Parse(jsonContent);
 
         var newSong = new JsonObject
         {
