@@ -71,9 +71,9 @@ lab:
 
 :::image type="content" source="../media/model-deployments.png" alt-text="Azure OpenAI 배포 페이지의 스크린샷.":::
 
-1. **새 배포 만들기**를 선택한 다음, **모델 배포**를 선택합니다.
+1. **새 배포 만들기**를 선택한 다음 **+새 배포 만들기**를 선택합니다.
 
-1. **모델 선택**에서 **gpt-35-turbo-16k**를 선택합니다.
+1. **모델 배포** 팝업에서 **gpt-35-turbo-16k**를 선택합니다.
 
     기본 모델 버전 사용
 
@@ -108,6 +108,8 @@ lab:
 
     ```c#
     using AITravelAgent;
+    using System.ComponentModel;
+    using Microsoft.SemanticKernel;
 
     class CurrencyConverter
     {
@@ -247,6 +249,7 @@ lab:
 
     ```c#
     kernel.ImportPluginFromType<CurrencyConverter>();
+    kernel.ImportPluginFromType<ConversationSummaryPlugin>();
     var prompts = kernel.ImportPluginFromPromptDirectory("Prompts");
 
     var result = await kernel.InvokeAsync(prompts["GetTargetCurrencies"],
@@ -281,6 +284,7 @@ lab:
 
     ```c#
     kernel.ImportPluginFromType<CurrencyConverter>();
+    kernel.ImportPluginFromType<ConversationSummaryPlugin>();
     var prompts = kernel.ImportPluginFromPromptDirectory("Prompts");
 
     Console.WriteLine("What would you like to do?");
@@ -331,6 +335,7 @@ lab:
 
     ```c#
     kernel.ImportPluginFromType<CurrencyConverter>();
+    kernel.ImportPluginFromType<ConversationSummaryPlugin>();
     var prompts = kernel.ImportPluginFromPromptDirectory("Prompts");
 
     OpenAIPromptExecutionSettings settings = new()
@@ -526,12 +531,12 @@ lab:
           "description": "The destination a user wants to visit",
           "required": true
       }
-  ]
-  ```
+   ]
+   ```
 
 1. **Prompts/SuggestActivities/skprompt.txt**로 이동하여 파일을 엽니다.
 
-1. 채팅 기록을 사용하라는 메시지를 추가합니다.
+1. 프롬프트의 처음 절반을 채팅 기록 변수를 사용하는 다음 프롬프트로 바꿉니다.
 
     ```html 
     You are an experienced travel agent. 
