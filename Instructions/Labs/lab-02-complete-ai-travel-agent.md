@@ -30,7 +30,7 @@ lab:
 연습을 완료하려면 시스템에 다음이 설치되어어 있어야 합니다.
 
 * [Visual Studio Code](https://code.visualstudio.com)
-* [최신 .NET 7.0 SDK](https://dotnet.microsoft.com/download/dotnet/7.0)
+* [최신 .NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 * Visual Studio Code용 [C# 확장](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp)
 
 ### 개발 환경 준비
@@ -40,7 +40,11 @@ lab:
 > [!IMPORTANT]
 > .NET Framework 8.0과 C#용 VS Code 확장 및 NuGet 패키지 관리자가 설치되어 있어야 합니다.
 
-1. `https://github.com/MicrosoftLearning/AZ-2005-Develop-AI-agents-OpenAI-Semantic-Kernel-SDK/blob/master/Allfiles/Labs/02/Lab-02-Starter.zip`에 있는 Zip 파일을 다운로드합니다.
+1. 새 브라우저 창에 다음 URL을 붙여넣습니다.
+   
+     `https://github.com/MicrosoftLearning/AZ-2005-Develop-AI-agents-OpenAI-Semantic-Kernel-SDK/blob/master/Allfiles/Labs/02/Lab-02-Starter.zip`
+
+1. 페이지의 오른쪽 위에 있는 <kbd>...</kbd> 단추를 클릭하여 zip 파일을 다운로드하거나 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>를 누릅니다.
 
 1. 데스크톱의 폴더와 같이 쉽게 찾고 기억할 수 있는 위치에 Zip 파일의 콘텐츠를 추출합니다.
 
@@ -49,6 +53,9 @@ lab:
 1. 추출한 **시작** 폴더로 이동하여 **폴더 선택**을 선택합니다.
 
 1. 코드 편집기에서 **Program.cs** 파일을 엽니다.
+
+> [!NOTE]
+> 폴더에 있는 모든 파일을 신뢰하는지 묻는 메시지가 표시되면 **예, 작성자를 신뢰합니다**를 선택합니다.
 
 ## 연습 1: 의미 체계 커널 SDK를 사용하여 플러그 인 만들기
 
@@ -102,9 +109,9 @@ lab:
 
 이 작업에서는 기본 통화에서 대상 통화로 금액을 변환할 수 있는 네이티브 함수를 만듭니다.
 
-1. **Plugins/ConvertCurrency** 폴더에 `CurrencyConverter.cs`(이)라는 새 파일 만들기
+1. **Plugins/ConvertCurrency** 폴더에 **CurrencyConverter.cs**라는 새 파일 만들기
 
-1. `CurrencyConverter.cs` 파일에서 다음 코드를 추가하여 플러그 인 함수를 만듭니다.
+1. **CurrencyConverter.cs** 파일에서 다음 코드를 추가하여 플러그 인 함수를 만듭니다.
 
     ```c#
     using AITravelAgent;
@@ -122,9 +129,9 @@ lab:
     }
     ```
 
-    이 코드에서는 `KernelFunction` 데코레이터를 사용하여 네이티브 함수를 선언합니다. 또한 `Description` 데코레이터를 사용하여 함수의 기능에 대한 설명을 추가합니다. `Currency.Currencies`을(를) 사용하여 통화 및 환율 사전을 가져올 수 있습니다. 다음으로 지정된 금액을 한 통화에서 다른 통화로 변환하는 몇 가지 논리를 추가합니다.
+    이 코드에서는 **KernelFunction** 데코레이터를 사용하여 네이티브 함수를 선언합니다. 또한 **Description** 데코레이터를 사용하여 함수의 기능에 대한 설명을 추가합니다. **Currency.Currencies**를 사용하여 통화 및 환율 사전을 가져올 수 있습니다. 다음으로 지정된 금액을 한 통화에서 다른 통화로 변환하는 몇 가지 논리를 추가합니다.
 
-1. `ConvertAmount` 함수를 다음 코드로 수정합니다.
+1. **ConvertAmount** 함수를 다음 코드로 수정합니다.
 
     ```c#
     [KernelFunction, Description("Convert an amount from one currency to another")]
@@ -156,9 +163,9 @@ lab:
     }
     ```
 
-    이 코드에서는 `Currency.Currencies` 사전을 사용하여 대상 및 기본 통화에 대한 `Currency` 개체를 가져옵니다. 그런 다음 `Currency` 개체를 사용하여 기본 통화에서 대상 통화로 금액을 변환합니다. 마지막으로, 변환된 양으로 문자열을 반환합니다. 다음으로 플러그 인을 테스트해 보겠습니다.
+    이 코드에서는 **Currency.Currencies** 사전을 사용하여 대상 및 기본 통화에 대한 **Currency** 개체를 가져옵니다. 그런 다음 **Currency** 개체를 사용하여 기본 통화에서 대상 통화로 금액을 변환합니다. 마지막으로, 변환된 양으로 문자열을 반환합니다. 다음으로 플러그 인을 테스트해 보겠습니다.
 
-1. `Program.cs` 파일에서 다음 코드를 사용하여 새 플러그 인 함수를 가져오고 호출합니다.
+1. **Program.cs** 파일에서 다음 코드를 사용하여 새 플러그 인 함수를 가져오고 호출합니다.
 
     ```c#
     kernel.ImportPluginFromType<CurrencyConverter>();
@@ -177,7 +184,7 @@ lab:
     Console.WriteLine(result);
     ```
 
-    이 코드에서는 `ImportPluginFromType` 메서드를 사용하여 플러그 인을 가져옵니다. 그런 다음 `InvokeAsync` 메서드를 사용하여 플러그 인 함수를 호출합니다. `InvokeAsync` 메서드는 플러그 인 이름, 함수 이름 및 매개 변수 사전을 사용합니다. 마지막으로 결과를 콘솔에 출력합니다. 다음으로 코드를 실행하여 작동하는지 확인합니다.
+    이 코드에서는 **ImportPluginFromType** 메서드를 사용하여 플러그 인을 가져옵니다. 그런 다음 **InvokeAsync** 메서드를 사용하여 플러그 인 함수를 호출합니다. **InvokeAsync** 메서드는 플러그 인 이름, 함수 이름 및 매개 변수 사전을 사용합니다. 마지막으로 결과를 콘솔에 출력합니다. 다음으로 코드를 실행하여 작동하는지 확인합니다.
 
 1. 터미널에서 `dotnet run`를 입력합니다. 다음과 같은 출력이 표시됩니다.
 
@@ -191,11 +198,11 @@ lab:
 
 이 작업에서는 사용자의 입력을 구문 분석하여 변환할 대상 통화, 기본 통화 및 금액을 식별하는 프롬프트를 만듭니다.
 
-1. **프롬프트** 폴더에 `GetTargetCurrencies`(이)라는 새 폴더 만들기
+1. **Prompts** 폴더에 **GetTargetCurrencies**라는 새 폴더 만들기
 
-1. `GetTargetCurrencies` 폴더에서 `config.json`(이)라는 새 파일을 만듭니다.
+1. **GetTargetCurrencies** 폴더에서 **config.json**이라는 새 파일을 만들기
 
-1. `config.json` 파일에 다음 텍스트를 입력합니다.
+1. **config.json** 파일에 다음 텍스트를 입력합니다.
 
     ```output
     {
@@ -218,9 +225,9 @@ lab:
     }
     ```
 
-1. `GetTargetCurrencies` 폴더에서 `skprompt.txt`(이)라는 새 파일을 만듭니다.
+1. **GetTargetCurrencies** 폴더에서 **skprompt.txt**라는 새 파일을 만들기
 
-1. `skprompt.txt` 파일에 다음 텍스트를 입력합니다.
+1. **skprompt.txt** 파일에 다음 텍스트를 입력합니다.
 
     ```html
     <message role="system">Identify the target currency, base currency, and 
@@ -245,7 +252,7 @@ lab:
 
 이 작업에서는 애플리케이션을 실행하고 코드가 올바르게 작동하는지 확인합니다. 
 
-1. 다음 코드로 `Program.cs` 파일을 업데이트하여 새 프롬프트를 테스트합니다.
+1. 다음 코드로 **Program.cs** 파일을 업데이트하여 새 프롬프트를 테스트합니다.
 
     ```c#
     kernel.ImportPluginFromType<CurrencyConverter>();
@@ -268,9 +275,9 @@ lab:
     ```
 
     > [!NOTE]
-    > 코드가 예상한 결과를 생성하지 못하는 경우 **솔루션** 폴더에서 코드를 검토할 수 있습니다. 더 정확한 결과를 생성하려면 `skprompt.txt` 파일에서 프롬프트를 조정해야 할 수 있습니다.
+    > 코드가 예상한 결과를 생성하지 못하는 경우 **솔루션** 폴더에서 코드를 검토할 수 있습니다. 더 정확한 결과를 생성하려면 **skprompt.txt** 파일에서 프롬프트를 조정해야 할 수 있습니다.
 
-이제 한 통화에서 다른 통화로 금액을 변환할 수 있는 플러그 인과 사용자의 입력을 `ConvertAmount` 함수에서 사용할 수 있는 형식으로 구문 분석하는 데 사용할 수 있는 프롬프트가 있습니다. 이렇게 하면 사용자가 AI 여행사를 사용하여 통화 금액을 쉽게 변환할 수 있습니다.
+이제 한 통화에서 다른 통화로 금액을 변환할 수 있는 플러그 인과 사용자의 입력을 **ConvertAmount** 함수에서 사용할 수 있는 형식으로 구문 분석하는 데 사용할 수 있는 프롬프트가 있습니다. 이렇게 하면 사용자가 AI 여행사를 사용하여 통화 금액을 쉽게 변환할 수 있습니다.
 
 ## 연습 2: 사용자 의도에 따라 플러그 인 선택 자동화
 
@@ -280,7 +287,7 @@ lab:
 
 ### 작업 1: GetIntent 플러그 인 사용
 
-1. 다음 코드를 사용하여 `Program.cs` 파일을 업데이트합니다.
+1. **Program.cs** 파일을 다음 코드로 업데이트합니다.
 
     ```c#
     kernel.ImportPluginFromType<CurrencyConverter>();
@@ -297,7 +304,7 @@ lab:
 
     ```
 
-    이 코드에서는 `GetIntent` 프롬프트를 사용하여 사용자의 의도를 검색합니다. 그런 다음 `intent`라는 변수에 의도를 저장합니다. 다음으로 의도를 `CurrencyConverter` 플러그 인으로 라우팅합니다.
+    이 코드에서는 **GetIntent** 프롬프트를 사용하여 사용자의 의도를 검색합니다. 그런 다음 **intent**라는 변수에 의도를 저장합니다. 다음으로 의도를 **CurrencyConverter** 플러그 인으로 라우팅합니다.
 
 1. `Program.cs` 파일에 다음 코드를 추가합니다.
 
@@ -325,13 +332,13 @@ lab:
     }
     ```
 
-    `GetIntent` 플러그 인은 다음 값을 반환합니다. ConvertCurrency, SuggestDestinations, SuggestActivities, Translate, HelpfulPhrases, Unknown. `switch` 문을 사용하여 사용자의 의도를 적절한 플러그 인으로 라우팅합니다. 
+    **GetIntent** 플러그 인은 다음 값을 반환합니다. ConvertCurrency, SuggestDestinations, SuggestActivities, Translate, HelpfulPhrases, Unknown. **switch** 문을 사용하여 사용자의 의도를 적절한 플러그 인으로 라우팅합니다. 
     
-    사용자의 의도가 통화를 환산하는 것이라면 `GetTargetCurrencies` 프롬프트를 사용하여 통화 정보를 검색합니다. 그런 다음 `CurrencyConverter` 플러그 인을 사용하여 금액을 변환합니다.
+    사용자의 의도가 통화를 환산하는 것이라면 **GetTargetCurrencies** 프롬프트를 사용하여 통화 정보를 검색합니다. 그런 다음 **CurrencyConverter** 플러그 인을 사용하여 금액을 변환합니다.
 
     다음으로 다른 의도를 처리하기 위해 몇 가지 사례를 추가합니다. 지금은 의미 체계 커널 SDK의 자동 함수 호출 기능을 사용하여 의도를 사용 가능한 플러그 인으로 라우팅해 보겠습니다.
 
-1. `Program.cs` 파일에 다음 코드를 추가하여 자동 함수 호출 설정을 만듭니다.
+1. **Program.cs** 파일에 다음 코드를 추가하여 자동 함수 호출 설정을 만듭니다.
 
     ```c#
     kernel.ImportPluginFromType<CurrencyConverter>();
@@ -353,7 +360,7 @@ lab:
 
     다음으로 다른 의도에 대한 스위치 문에 사례를 추가합니다.
 
-1. 다음 코드를 사용하여 `Program.cs` 파일을 업데이트합니다.
+1. **Program.cs** 파일을 다음 코드로 업데이트합니다.
 
     ```c#
     switch (intent) {
@@ -373,9 +380,9 @@ lab:
     }
     ```
 
-    이 코드에서는 `AutoInvokeKernelFunctions` 설정을 사용하여 커널에서 참조되는 함수와 프롬프트를 자동으로 호출합니다. 사용자의 의도가 통화 환산이라면 `CurrencyConverter` 플러그 인이 해당 작업을 수행합니다. 
+    이 코드에서는 **AutoInvokeKernelFunctions** 설정을 사용하여 커널에서 참조되는 함수와 프롬프트를 자동으로 호출합니다. 사용자의 의도가 통화 환산이라면 **CurrencyConverter** 플러그 인이 해당 작업을 수행합니다. 
     
-    사용자의 의도가 대상 또는 작업 제안을 가져오거나, 구를 번역하거나, 특정 언어로 유용한 구를 가져오는 것인 경우, `AutoInvokeKernelFunctions` 설정은 프로젝트 코드에 포함된 기존 플러그 인을 자동으로 호출합니다.
+    사용자의 의도가 대상 또는 작업 제안을 가져오거나, 구를 번역하거나, 특정 언어로 유용한 구를 가져오는 것인 경우, **AutoInvokeKernelFunctions** 설정은 프로젝트 코드에 포함된 기존 플러그 인을 자동으로 호출합니다.
 
     이러한 의도 사례에 속하지 않는 경우 사용자 입력을 LLM(대규모 언어 모델)에 대한 프롬프트로 실행하는 코드를 추가할 수도 있습니다.
 
@@ -455,7 +462,7 @@ lab:
 
 이 연습에서는 대화 기록을 사용하여 LLM(대규모 언어 모델)에 컨텍스트를 제공합니다. 또한 실제 챗봇처럼 사용자가 대화를 계속할 수 있도록 코드를 조정합니다. 그럼 시작하겠습니다.
 
-1. 사용자의 입력을 받아들이기 위해 `do`-`while` 루프를 사용하도록 코드를 수정합니다.
+1. 사용자의 입력을 받아들이기 위해 do-while 루프를 사용하도록 코드를 수정합니다.
 
     ```c#
     string input;
@@ -472,7 +479,7 @@ lab:
 
     이제 사용자가 빈 줄을 입력할 때까지 대화를 계속할 수 있습니다.
 
-1. `SuggestDestinations` 사례를 수정하여 사용자 여행에 대한 세부 정보를 캡처합니다.
+1. **SuggestDestinations** 사례를 수정하여 사용자 여행에 대한 세부 정보를 캡처합니다.
 
     ```c#
     case "SuggestDestinations":
@@ -482,7 +489,7 @@ lab:
         break;
     ```
 
-1. 다음 코드와 함께 `SuggestActivities` 사례의 여행 세부 정보를 사용합니다.
+1. 다음 코드와 함께 **SuggestActivities** 사례의 여행 세부 정보를 사용합니다.
 
     ```c#
      case "SuggestActivities":
@@ -493,9 +500,9 @@ lab:
         break;
     ```
 
-    이 코드에서는 기본 제공된 `SummarizeConversation` 함수를 사용하여 사용자와의 채팅을 요약합니다. 다음으로 요약을 활용하여 대상에서의 작업을 제안해 보겠습니다.
+    이 코드에서는 기본 제공된 **SummarizeConversation** 함수를 사용하여 사용자와의 채팅을 요약합니다. 다음으로 요약을 활용하여 대상에서의 작업을 제안해 보겠습니다.
 
-1. 다음 코드를 사용하여 `SuggestActivities` 사례를 확장합니다.
+1. 다음 코드를 사용하여 **SuggestActivities** 사례를 확장합니다.
 
     ```c#
     var activities = await kernel.InvokePromptAsync(
@@ -513,11 +520,11 @@ lab:
     break;
     ```
 
-    이 코드에서는 `input` 및 `chatSummary`를 커널 인수로 추가합니다. 그런 다음 커널은 프롬프트를 호출하고 이를 `SuggestActivities` 플러그 인으로 라우팅합니다. 또한 사용자의 입력과 도우미의 응답을 채팅 기록에 추가하고 결과를 표시합니다. 다음으로, `chatSummary` 변수를 `SuggestActivities` 플러그 인에 추가해야 합니다.
+    이 코드에서는 **input** 및 **chatSummary**를 커널 인수로 추가합니다. 그런 다음 커널은 프롬프트를 호출하고 이를 **SuggestActivities** 플러그 인으로 라우팅합니다. 또한 사용자의 입력과 도우미의 응답을 채팅 기록에 추가하고 결과를 표시합니다. 다음으로, **SuggestActivities** 플러그 인에 **chatSummary** 변수를 추가해야 합니다.
 
 1. **Prompts/SuggestActivities/config.json**으로 이동하여 Visual Studio Code에서 파일을 엽니다.
 
-1. `input_variables` 아래에 채팅 기록에 대한 변수를 추가합니다.
+1. **input_variables** 아래에 채팅 기록에 대한 변수를 추가합니다.
 
     ```json
     "input_variables": [

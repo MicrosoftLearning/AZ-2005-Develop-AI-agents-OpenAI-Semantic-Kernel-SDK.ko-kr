@@ -30,7 +30,7 @@ lab:
 연습을 완료하려면 시스템에 다음이 설치되어어 있어야 합니다.
 
 * [Visual Studio Code](https://code.visualstudio.com)
-* [최신 .NET 7.0 SDK](https://dotnet.microsoft.com/download/dotnet/7.0)
+* [최신 .NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 * Visual Studio Code용 [C# 확장](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp)
 
 
@@ -41,7 +41,11 @@ lab:
 > [!IMPORTANT]
 > .NET Framework 8.0과 C#용 VS Code 확장 및 NuGet 패키지 관리자가 설치되어 있어야 합니다.
 
-1. `https://github.com/MicrosoftLearning/AZ-2005-Develop-AI-agents-OpenAI-Semantic-Kernel-SDK/blob/master/Allfiles/Labs/01/Lab-01-Starter.zip`에 있는 Zip 파일을 다운로드합니다.
+1. 새 브라우저 창에 다음 URL을 붙여넣습니다.
+   
+     `https://github.com/MicrosoftLearning/AZ-2005-Develop-AI-agents-OpenAI-Semantic-Kernel-SDK/blob/master/Allfiles/Labs/01/Lab-01-Starter.zip`
+
+1. 페이지의 오른쪽 위에 있는 `...`단추를 클릭하여 zip 파일을 다운로드하거나 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>를 누릅니다.
 
 1. 데스크톱의 폴더와 같이 쉽게 찾고 기억할 수 있는 위치에 Zip 파일의 콘텐츠를 추출합니다.
 
@@ -50,6 +54,9 @@ lab:
 1. 추출한 **시작** 폴더로 이동하여 **폴더 선택**을 선택합니다.
 
 1. 코드 편집기에서 **Program.cs** 파일을 엽니다.
+
+> [!NOTE]
+> 폴더에 있는 모든 파일을 신뢰하는지 묻는 메시지가 표시되면 **예, 작성자를 신뢰합니다**를 선택합니다. 
 
 ## 연습 1: 의미 체계 커널 SDK로 프롬프트 실행
 
@@ -122,7 +129,7 @@ lab:
     Console.WriteLine(result);
     ```
 
-1. 코드를 실행하고 세계에서 가장 유명한 5대 뮤지션이 포함된 Azure Open AI 모델의 응답이 나타나는지 확인합니다.
+1. `dotnet run`을(를) 입력하여 코드를 실행하고 세계에서 가장 유명한 뮤지션 상위 5명이 포함된 Azure Open AI 모델의 응답이 표시되는지 확인합니다.
 
     응답은 커널에 전달한 Azure Open AI 모델에서 제공됩니다. 의미 체계 커널 SDK는 LLM(대규모 언어 모델)에 연결하고 프롬프트를 실행할 수 있습니다. LLM으로부터 얼마나 빨리 응답을 받을 수 있었는지 확인합니다. 의미 체계 커널 SDK를 사용하면 스마트 애플리케이션을 쉽고 효율적으로 빌드할 수 있습니다.
 
@@ -224,7 +231,7 @@ lab:
     Added 'Danse' to recently played
     ```
 
-    'RecentlyPlayed.txt'를 열면 목록에 새 노래가 추가된 것을 볼 수 있습니다.
+    'Files/RecentlyPlayed.txt,'를 열면 목록에 새 노래가 추가된 것을 볼 수 있습니다.
 
 ### 작업 2: 개인 맞춤 노래 추천 제공
 
@@ -311,10 +318,10 @@ lab:
     using System.ComponentModel;
     using Microsoft.SemanticKernel;
 
-    public class MusicConcertPlugin
+    public class MusicConcertsPlugin
     {
         [KernelFunction, Description("Get a list of upcoming concerts")]
-        public static string GetTours()
+        public static string GetConcerts()
         {
             string content = File.ReadAllText($"Files/ConcertDates.txt");
             return content;
@@ -417,11 +424,21 @@ Handlebars 계획 도구는 작업을 수행하는 데 여러 단계가 필요�
 1. 'Program.cs' 파일에서 코드를 다음과 같이 업데이트합니다.
 
     ```c#
+    using Microsoft.SemanticKernel;
+    using Microsoft.SemanticKernel.Planning.Handlebars;
+    
+    var builder = Kernel.CreateBuilder();
+    builder.AddAzureOpenAIChatCompletion(
+        "your-deployment-name",
+        "your-endpoint",
+        "your-api-key",
+        "deployment-model");
     var kernel = builder.Build();
     kernel.ImportPluginFromType<MusicLibraryPlugin>();
-    kernel.ImportPluginFromType<MusicConcertPlugin>();
+    kernel.ImportPluginFromType<MusicConcertsPlugin>();
     kernel.ImportPluginFromPromptDirectory("Prompts");
 
+    #pragma warning disable SKEXP0060
     var planner = new HandlebarsPlanner(new HandlebarsPlannerOptions() { AllowLoops = true });
 
     string location = "Redmond WA USA";
@@ -433,6 +450,8 @@ Handlebars 계획 도구는 작업을 수행하는 데 여러 단계가 필요�
 
     Console.WriteLine($"{result}");
     ```
+
+    >[!NOTE] 핸들바 패키지는 현재 미리 보기 상태이므로 코드를 실행하려면 컴파일러 경고를 표시하지 않는 것이 필요할 수 있습니다.
 
 1. 터미널에서 `dotnet run`를 입력합니다.
 
@@ -512,7 +531,7 @@ Handlebars 계획 도구는 작업을 수행하는 데 여러 단계가 필요�
 
     그다음, 생성된 이 템플릿을 사용하여 사용자 고유의 Handlebars 계획을 만듭니다. 
 
-1. 다음 텍스트를 사용하여 'handlebarsTemplate.txt'라는 새 파일을 만듭니다.
+1. 'Files' 디렉토리에서 다음 텍스트를 사용하여 'HandlebarsTemplate.txt'라는 새 파일을 만듭니다.
 
     ```output
     {{set "addSong" addSong}}
@@ -553,6 +572,9 @@ Handlebars 계획 도구는 작업을 수행하는 데 여러 단계가 필요�
 1. 기존 코드를 수정하여 Handlebars 계획을 제거합니다.
 
     ```c#
+    using Microsoft.SemanticKernel;
+    using Microsoft.SemanticKernel.PromptTemplates.Handlebars;
+
     var builder = Kernel.CreateBuilder();
     builder.AddAzureOpenAIChatCompletion(
         "your-deployment-name",
@@ -579,7 +601,7 @@ Handlebars 계획 도구는 작업을 수행하는 데 여러 단계가 필요�
 1. 템플릿 파일을 읽는 코드를 추가하면 함수가 만들어집니다.
 
     ```c#
-    string template = File.ReadAllText($"handlebarsTemplate.txt");
+    string template = File.ReadAllText($"Files/HandlebarsTemplate.txt");
 
     var handlebarsPromptFunction = kernel.CreateFunctionFromPrompt(
         new() {
