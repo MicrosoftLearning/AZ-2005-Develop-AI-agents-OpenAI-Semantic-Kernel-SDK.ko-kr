@@ -21,7 +21,7 @@ lab:
 * 의미 체계 커널 개체 빌드
 * 의미 체계 커널 SDK를 사용하여 프롬프트 실행
 * 의미 체계 커널 함수 및 플러그 인 만들기
-* Handlebars 계획 도구를 사용하여 작업 자동화
+* 자동 함수 호출을 활성화하여 작업 자동화
 
 ## 랩 설정
 
@@ -105,7 +105,7 @@ lab:
 
     `dotnet add package Microsoft.SemanticKernel --version 1.2.0`
 
-1. 커널을 만들기 위해 다음 코드를 'Program.cs' 파일에 추가합니다.
+1. 커널을 생성하려면 **Program.cs** 파일에 다음 코드를 추가합니다.
     
     ```c#
     using Microsoft.SemanticKernel;
@@ -202,7 +202,7 @@ lab:
 
     이 코드에서는 아티스트, 노래, 장르를 문자열로 받아들이는 함수를 만듭니다. 함수의 `Description` 외에도 입력 변수에 대한 설명도 추가합니다. 'RecentlyPlayed.txt' 파일에는 사용자가 최근에 재생한 노래의 json 형식 목록이 포함되어 있습니다. 이 코드는 파일에서 기존 콘텐츠를 읽고 구문 분석한 후 새 노래를 목록에 추가합니다. 그런 다음 업데이트된 목록이 파일에 다시 기록됩니다.
 
-1. Program.cs 파일을 다음 코드로 업데이트합니다.
+1. **Program.cs** 파일을 다음 코드로 업데이트합니다.
 
     ```c#
     var kernel = builder.Build();
@@ -221,7 +221,7 @@ lab:
     Console.WriteLine(result);
     ```
 
-    이 코드에서는 `ImportPluginFromType`을 사용하여 `MusicLibraryPlugin`을 커널로 가져옵니다. 그런 다음 호출하려는 플러그 인 이름과 함수 이름으로 `InvokeAsync`를 호출합니다. 또한 아티스트, 노래, 장르를 인수로 전달합니다.
+    이 코드에서는 ImportPluginFromType을 사용하여 MusicLibraryPlugin을 커널로 가져옵니다. 그런 다음 호출하려는 플러그 인 이름과 함수 이름으로 InvokeAsync를 호출합니다. 또한 아티스트, 노래, 장르를 인수로 전달합니다.
 
 1. 터미널에 `dotnet run`을 입력하여 코드를 실행합니다.
 
@@ -254,7 +254,7 @@ lab:
 
     이 함수는 'MusicLibrary.txt'라는 파일에서 사용 가능한 음악 목록을 읽습니다. 파일에는 사용자가 사용할 수 있는 json 형식의 노래 목록이 포함되어 있습니다.
 
-1. Program.cs 파일을 다음 코드로 업데이트합니다.
+1. **Program.cs** 파일을 다음 코드로 업데이트합니다.
 
     ```c#
     var kernel = builder.Build();
@@ -373,9 +373,9 @@ lab:
     please recommend a relevant concert that is close to their location.
     ```
 
-    이 프롬프트는 LLM이 사용자 입력을 필터링하고 텍스트에서 대상만 검색하는 데 도움이 됩니다. 다음으로 계획 도구를 호출하여 목표를 달성하기 위해 플러그 인을 결합하는 계획을 만듭니다.
+    이 프롬프트는 LLM이 사용자 입력을 필터링하고 텍스트에서 대상만 검색하는 데 도움이 됩니다. 다음으로 플러그인을 테스트하여 출력을 확인합니다.
 
-1. 'Program.cs' 파일을 열고 다음 코드로 업데이트합니다.
+1. **Program.cs** 파일을 열고 다음 코드로 업데이트합니다.
 
     ```c#
     var kernel = builder.Build();    
@@ -408,27 +408,21 @@ lab:
 
     프롬프트와 위치를 조정하여 어떤 다른 결과를 얻을 수 있는지 확인해 보세요.
 
-## 연습 3: Handlebars 계획을 사용하여 제안 자동화
+## 연습 3: 사용자 입력에 기반한 제안 자동화
 
-Handlebars 계획 도구는 작업을 수행하는 데 여러 단계가 필요할 때 유용합니다. 계획 도구는 AI를 사용하여 커널에 등록된 플러그 인을 선택하고 일련의 단계로 결합하여 목표를 달성합니다. 이 연습에서는 Handlebars 계획 도구를 사용하여 계획 템플릿을 생성하고 이를 사용하여 제안을 자동화합니다.
+대신 자동 함수 호출을 사용하여 플러그 인 함수를 수동으로 호출하는 것을 피할 수 있습니다. LLM은 목표를 달성하기 위해 커널에 등록된 플러그 인을 자동으로 선택하고 결합합니다. 이 연습에서는 자동 함수 호출을 사용하도록 설정하여 권장 사항을 자동화합니다.
 
 **예상 연습 완료 시간**: 10분
 
-### 작업 1: 계획 템플릿 생성
+### 작업 1: 사용자 입력에 기반한 제안 자동화
 
-이 작업에서는 Handlebars 계획 도구를 사용하여 계획 템플릿을 생성합니다. 계획 템플릿은 사용자의 입력에 따라 제안을 자동화하는 데 사용됩니다.
+이 작업에서는 자동 함수 호출을 사용하도록 설정하여 사용자의 입력에 따라 제안을 생성합니다.
 
-1. 터미널에 다음을 입력하여 Handlebars 계획 도구를 설치합니다.
-
-    `dotnet add package Microsoft.SemanticKernel.Planners.Handlebars --version 1.2.0-preview`
-
-    다음으로 SuggestConcert 프롬프트를 바꾸고 Handlebars 계획 도구를 사용하여 대신 작업을 수행하도록 합니다.
-
-1. 'Program.cs' 파일에서 코드를 다음과 같이 업데이트합니다.
+1. **Program.cs** 파일에서 코드를 다음과 같이 업데이트합니다.
 
     ```c#
     using Microsoft.SemanticKernel;
-    using Microsoft.SemanticKernel.Planning.Handlebars;
+    using Microsoft.SemanticKernel.Connectors.OpenAI;
     
     var builder = Kernel.CreateBuilder();
     builder.AddAzureOpenAIChatCompletion(
@@ -441,20 +435,17 @@ Handlebars 계획 도구는 작업을 수행하는 데 여러 단계가 필요�
     kernel.ImportPluginFromType<MusicConcertsPlugin>();
     kernel.ImportPluginFromPromptDirectory("Prompts");
 
-    #pragma warning disable SKEXP0060
-    var planner = new HandlebarsPlanner(new HandlebarsPlannerOptions() { AllowLoops = true });
-
-    string location = "Redmond WA USA";
-    string goal = @$"Based on the user's recently played music, suggest a 
+    OpenAIPromptExecutionSettings settings = new()
+    {
+        ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
+    };
+    
+    string prompt = @$"Based on the user's recently played music, suggest a 
         concert for the user living in ${location}";
 
-    var plan = await planner.CreatePlanAsync(kernel, goal);
-    var result = await plan.InvokeAsync(kernel);
-
-    Console.WriteLine($"{result}");
+    var autoInvokeResult = await kernel.InvokePromptAsync(prompt, new(settings));
+    Console.WriteLine(autoInvokeResult);
     ```
-
-    >[!NOTE] 핸들바 패키지는 현재 미리 보기 상태이므로 코드를 실행하려면 컴파일러 경고를 표시하지 않는 것이 필요할 수 있습니다.
 
 1. 터미널에서 `dotnet run`를 입력합니다.
 
@@ -464,130 +455,15 @@ Handlebars 계획 도구는 작업을 수행하는 데 여러 단계가 필요�
     Based on the user's recently played songs, the artist "Mademoiselle" has an upcoming concert in Seattle WA, USA on February 22, 2024, which is close to Redmond WA. Therefore, the recommended concert for the user would be Mademoiselle's concert in Seattle.
     ```
 
-    다음으로 코드를 변경하여 Handlebars 계획 템플릿을 출력하도록 합니다.
+    의미 체계 커널은 올바른 매개변수를 사용하여 `SuggestConcert` 함수를 자동으로 호출할 수 있습니다. 이제 에이전트가 최근에 재생한 음악 목록과 위치를 기반으로 사용자에게 콘서트를 할 수 있습니다. 다음으로 음악 권장 사항에 대한 지원을 추가할 수 있습니다.
 
-1. 'Program.cs' 파일에서 코드를 다음과 같이 업데이트합니다.
-
-    ```c#
-    var plan = await planner.CreatePlanAsync(kernel, goal);
-    Console.WriteLine("Plan:");
-    Console.WriteLine(plan);
-    ```
-
-    이제 생성된 계획을 볼 수 있습니다. 다음으로 노래 제안을 포함하거나 사용자의 최근 재생 목록에 노래를 추가하도록 계획을 수정합니다.
-
-1. 다음 코드 조각을 사용하여 코드를 확장합니다.
+1. 다음 코드를 사용하여 **Program.cs** 파일을 수정합니다.
 
     ```c#
-    var plan = await planner.CreatePlanAsync(kernel, 
-        @$"If add song:
-        Add a song to the user's recently played list.
-        
-        If concert recommendation:
-        Based on the user's recently played music, suggest a concert for 
-        the user living in a given location.
-
-        If song recommendation:
-        Suggest a song from the music library to the user based on their 
-        recently played songs.");
-
-    Console.WriteLine("Plan:");
-    Console.WriteLine(plan);
-    ```
-
-1. 만든 계획의 출력을 보려면 터미널에 `dotnet run`을 입력합니다.
-
-    다음 출력과 유사한 템플릿이 표시됩니다.
-
-    ```output
-    Plan:
-    {{!-- Step 1: Identify Key Values --}}
-    {{set "location" location}}
-    {{set "addSong" addSong}}
-    {{set "concertRecommendation" concertRecommendation}}
-    {{set "songRecommendation" concertRecommendation}}
-
-    {{!-- Step 2: Use the Right Helpers --}}
-    {{#if addSong}}
-        {{set "song" song}}
-        {{set "artist" artist}}
-        {{set "genre" genre}}
-        {{set "songAdded" (MusicLibraryPlugin-AddToRecentlyPlayed artist=artist song=song genre=genre)}}  
-        {{json songAdded}}
-    {{/if}}
-
-    {{#if concertRecommendation}}
-        {{set "concertSuggested" (Prompts-SuggestConcert location=location recentlyPlayedSongs=recentlyPlayedSongs musicLibrary=musicLibrary)}}
-        {{json concertSuggested}}
-    {{/if}}
-
-    {{#if songRecommendation}}
-        {{set "songSuggested" (SuggestSongPlugin-SuggestSong recentlyPlayedSongs=recentlyPlayedSongs musicLibrary=musicLibrary)}}
-        {{json songSuggested}}
-    {{/if}}
-
-    {{!-- Step 3: Output the Result --}}
-    {{json "Goal achieved"}}
-    ```
-
-     `{{#if ...}}` 구문을 확인합니다. 이 구문은 C#의 기존 `if`-`else` 블록과 유사하게 Handlebars 계획 도구가 사용할 수 있는 조건문 역할을 합니다. `if` 문은 `{{/if}}`로 닫혀야 합니다.
-
-    그다음, 생성된 이 템플릿을 사용하여 사용자 고유의 Handlebars 계획을 만듭니다. 
-
-1. 'Files' 디렉토리에서 다음 텍스트를 사용하여 'HandlebarsTemplate.txt'라는 새 파일을 만듭니다.
-
-    ```output
-    {{set "addSong" addSong}}
-    {{set "concertRecommendation" concertRecommendation}}
-    {{set "songRecommendation" songRecommendation}}
-
-    {{#if addSong}}
-        {{set "song" song}}
-        {{set "artist" artist}}
-        {{set "genre" genre}}
-        {{set addedSong (MusicLibraryPlugin-AddToRecentlyPlayed artist song genre)}}  
-        Output The following content, do not make any modifications:
-        {{json addedSong}}     
-    {{/if}}
-
-    {{#if concertRecommendation}}
-        {{set "location" location}}
-        {{set "concert" (Prompts-SuggestConcert location)}}
-        Output The following content, do not make any modifications:
-        {{json concert}}
-    {{/if}}
-
-    {{#if songRecommendation}}
-        {{set "recentlyPlayedSongs" (MusicLibraryPlugin-GetRecentPlays)}}
-        {{set "musicLibrary" (MusicLibraryPlugin-GetMusicLibrary)}}
-        {{set "song" (SuggestSongPlugin-SuggestSong recentlyPlayedSongs musicLibrary)}}
-        Output The following content, do not make any modifications:
-        {{json song}}
-    {{/if}}
-    ```
-
-    이 템플릿에서는 텍스트를 생성하지 않도록 LLM에 명령을 추가하여 출력이 플러그 인에 의해 엄격하게 관리되도록 합니다. 이제 템플릿을 사용해 보겠습니다.
-
-### 작업 2: Handlebars 계획 도구를 사용하여 제안 자동화
-
-이 작업에서는 Handlebars 계획 템플릿에서 함수를 만들고 이를 사용하여 사용자의 입력에 따라 제안을 자동화합니다.
-
-1. 기존 코드를 수정하여 Handlebars 계획을 제거합니다.
-
-    ```c#
-    using Microsoft.SemanticKernel;
-    using Microsoft.SemanticKernel.PromptTemplates.Handlebars;
-
-    var builder = Kernel.CreateBuilder();
-    builder.AddAzureOpenAIChatCompletion(
-        "your-deployment-name",
-        "your-endpoint",
-        "your-api-key",
-        "deployment-model");
-    var kernel = builder.Build();
-    kernel.ImportPluginFromType<MusicLibraryPlugin>();
-    kernel.ImportPluginFromType<MusicConcertsPlugin>();
-    kernel.ImportPluginFromPromptDirectory("Prompts");
+    OpenAIPromptExecutionSettings settings = new()
+    {
+        ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
+    };
     
     var songSuggesterFunction = kernel.CreateFunctionFromPrompt(
         promptTemplate: @"Based on the user's recently played music:
@@ -595,59 +471,52 @@ Handlebars 계획 도구는 작업을 수행하는 데 여러 단계가 필요�
         recommend a song to the user from the music library:
         {{$musicLibrary}}",
         functionName: "SuggestSong",
-        description: "Suggest a song to the user"
+        description: "Recommend a song from the music library"
     );
 
     kernel.Plugins.AddFromFunctions("SuggestSongPlugin", [songSuggesterFunction]);
+
+    string prompt = "Can you recommend a song from the music library?";
+
+    var autoInvokeResult = await kernel.InvokePromptAsync(prompt, new(settings));
+    Console.WriteLine(autoInvokeResult);
     ```
 
-1. 템플릿 파일을 읽는 코드를 추가하면 함수가 만들어집니다.
+    이 코드에서는 LLM에 노래를 추천하는 방법을 알려주는 프롬프트 템플릿에서 KernelFunction을 만듭니다. 그런 다음 커널에 등록하고 자동 함수 호출 설정을 활성화한 상태에서 프롬프트를 호출합니다. 커널은 함수를 실행하고 프롬프트를 완료하는 데 필요한 올바른 매개 변수를 제공할 수 있습니다.
+
+1. 터미널에 `dotnet run`을 입력하여 코드를 실행합니다.
+
+    생성된 출력은 최근에 재생된 음악을 기반으로 사용자에게 노래를 추천해야 합니다. 응답은 다음 출력과 유사하게 나타날 수 있습니다.
+    
+    ```
+    Based on your recently played music, I recommend you listen to the song "Luv(sic)". It falls under the genres of hiphop and rap, which aligns with some of your recently played songs. Enjoy!  
+    ```
+
+    다음으로, 최근 재생한 노래 목록을 업데이트하는 메시지를 표시해 보겠습니다.
+
+1. **Program.cs** 파일을 다음 코드로 업데이트합니다.
 
     ```c#
-    string template = File.ReadAllText($"Files/HandlebarsTemplate.txt");
+    string prompt = @"Add this song to the recently played songs list:  title: 'Touch', artist: 'Cat's Eye', genre: 'Pop'";
 
-    var handlebarsPromptFunction = kernel.CreateFunctionFromPrompt(
-        new() {
-            Template = template,
-            TemplateFormat = "handlebars"
-        }, new HandlebarsPromptTemplateFactory()
-    );
+    var result = await kernel.InvokePromptAsync(prompt, new(settings));
+
+    Console.WriteLine(result);
     ```
 
-    이 코드에서는 `Template` 개체를 `TemplateFormat`과 함께 커널 메서드 `CreateFunctionFromPrompt`에 전달합니다. `CreateFunctionFromPrompt`는 또한 지정된 템플릿을 구문 분석하는 방법을 커널에 알려 주는 `IPromptTemplateFactory` 형식을 허용합니다. Handlebars 템플릿을 사용하고 있으므로 `HandlebarsPromptTemplateFactory` 형식을 사용합니다.
+1. 터미널에 `dotnet run`을 입력합니다.
 
-    다음으로 몇 가지 인수를 사용하여 함수를 실행하고 결과를 확인해 보겠습니다.
+    출력은 다음과 같은 형태가 됩니다.
 
-1. `Program.cs` 파일에 다음 코드를 추가합니다.
-
-    ```c#
-    string location = "Redmond WA USA";
-    var templateResult = await kernel.InvokeAsync(handlebarsPromptFunction,
-        new() {
-            { "location", location },
-            { "concertRecommendation", true },
-            { "songRecommendation", false },
-            { "addSong", false },
-            { "artist", "" },
-            { "song", "" },
-            { "genre", "" }
-        });
-
-    Console.WriteLine(templateResult);
+    ```
+    I have added the song 'Touch' by Cat's Eye to the recently played songs list.
     ```
 
-1. 계획 도구 템플릿의 출력을 보려면 터미널에 `dotnet run`을 입력합니다.
+    recentlyplayed.txt 파일을 열면 목록 맨 위에 새 노래가 추가된 것을 볼 수 있습니다.
+    
 
-    다음 출력과 유사한 응답이 표시됩니다.
-
-    ```output
-    Based on the user's recently played songs, Ly Hoa seems to be a relevant artist. The closest concert to Redmond WA, USA would be in Portland OR, USA on April 16th, 2024.  
-    ```
-
-    프롬프트는 최근에 재생한 음악 목록과 사용자 위치를 기반으로 사용자에게 콘서트를 제안할 수 있었습니다. 또한 다른 변수를 true로 설정하고 어떤 일이 일어나는지 확인해 볼 수 있습니다.
-
-이제 코드는 사용자의 입력에 따라 다른 작업을 수행할 수 있습니다. 잘했습니다!
+`AutoInvokeKernelFunctions` 설정을 사용하면 사용자의 요구에 맞는 플러그 인을 빌드하는 데 집중할 수 있습니다. 이제 에이전트가 사용자의 입력에 따라 자동으로 다양한 작업을 수행할 수 있습니다. 잘했습니다!
 
 ### 검토
 
-이 랩에서는 사용자의 음악 라이브러리를 관리하고 개인 맞춤 노래 및 콘서트 추천을 제공할 수 있는 AI 에이전트를 만들었습니다. 의미 체계 커널 SDK를 사용하여 AI 에이전트를 빌드하고 LLM(대규모 언어 모델) 서비스에 연결했습니다. 음악 라이브러리에 대한 사용자 지정 플러그 인을 만들고, Handlebars 계획 도구를 사용하여 제안을 자동화하고, Handlebars 계획 템플릿에서 함수를 만들어 사용자의 입력에 따라 제안을 자동화했습니다. 축하합니다. 랩을 완료했습니다.
+이 랩에서는 사용자의 음악 라이브러리를 관리하고 개인 맞춤 노래 및 콘서트 추천을 제공할 수 있는 AI 에이전트를 만들었습니다. 의미 체계 커널 SDK를 사용하여 AI 에이전트를 빌드하고 LLM(대규모 언어 모델) 서비스에 연결했습니다. 음악 라이브러리를 위한 사용자 지정 플러그 인을 만들고 자동 함수 호출을 사용하도록 설정하여 에이전트가 사용자의 입력에 동적으로 응답하도록 했습니다. 축하합니다. 랩을 완료했습니다.
