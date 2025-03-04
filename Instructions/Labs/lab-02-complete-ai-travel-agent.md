@@ -74,566 +74,261 @@ lab:
 
 1. 리소스가 생성되면 **리소스로 이동**을 선택합니다.
 
-1. **개요** 페이지에서 **Azure OpenAI Studio로 이동**을 선택합니다.
+1. **개요** 페이지에서 **Azure Foundry 포털로 이동**을 선택합니다.
 
-:::image type="content" source="../media/model-deployments.png" alt-text="Azure OpenAI 배포 페이지의 스크린샷.":::
+1. **새 배포 만들기**를 선택한 다음 **기본 모델에서** 선택합니다.
 
-1. **새 배포 만들기**를 선택한 다음 **+새 배포 만들기**를 선택합니다.
+1. 모델 목록에서 **gpt-35-turbo-16k**를 선택합니다.
 
-1. **모델 배포** 팝업에서 **gpt-35-turbo-16k**를 선택합니다.
+1. **확인**을 선택합니다.
 
-    기본 모델 버전 사용
+1. 배포의 이름을 입력하고 기본 옵션을 그대로 둡니다.
 
-1. 배포 이름 입력
-
-1. 배포가 완료되면 Azure OpenAI 리소스로 다시 이동합니다.
+1. 배포가 완료되면 Azure Portal에서 Azure OpenAI 리소스로 다시 이동합니다.
 
 1. **리소스 관리**에서 **키 및 엔드포인트**를 선택합니다.
 
-    다음 작업에서 이러한 값을 사용하여 커널을 빌드합니다. 키를 비공개로 안전하게 유지해야 합니다!
+    다음 작업에서 여기에 있는 데이터를 사용하여 커널을 빌드합니다. 키를 안전하게 비공개로 유지해야 합니다!
 
-1. Visual Studio Code의 **Program.cs** 파일로 돌아갑니다.
+### 작업 2: 네이티브 플러그 인 만들기
 
-1. Azure Open AI Services 배포 이름, API 키, 엔드포인트로 다음 변수 업데이트
+이 작업에서는 기본 통화에서 대상 통화로 금액을 변환할 수 있는 네이티브 함수 플러그 인을 만듭니다.
 
-    ```csharp
-    string yourDeploymentName = "";
-    string yourEndpoint = "";
-    string yourApiKey = "";
+1. Visual Studio Code 프로젝트로 돌아갑니다.
+
+1. **appsettings.json** 파일을 열고 Azure OpenAI Services 모델 ID, 엔드포인트 및 API 키로 값을 업데이트합니다.
+
+    ```json
+    {
+        "modelId": "gpt-35-turbo-16k",
+        "endpoint": "",
+        "apiKey": ""
+    }
     ```
 
-    > [!NOTE]
-    > 일부 의미 체계 커널 SDK 기능이 작동하려면 배포 모델이 "gpt-35-turbo-16k"여야 합니다.
-
-### 작업 2: 네이티브 함수 만들기
-
-이 작업에서는 기본 통화에서 대상 통화로 금액을 변환할 수 있는 네이티브 함수를 만듭니다.
-
-1. **Plugins/ConvertCurrency** 폴더에 **CurrencyConverter.cs**라는 새 파일 만들기
+1. **Plugins/ConvertCurrency** 폴더에 있는 **CurrencyConverter.cs**라는 파일로 이동합니다.
 
 1. **CurrencyConverter.cs** 파일에서 다음 코드를 추가하여 플러그 인 함수를 만듭니다.
 
     ```c#
-    using AITravelAgent;
-    using System.ComponentModel;
-    using Microsoft.SemanticKernel;
-
     class CurrencyConverter
     {
-        [KernelFunction, 
-        Description("Convert an amount from one currency to another")]
-        public static string ConvertAmount()
+        [KernelFunction("convert_currency")]
+        [Description("Converts an amount from one currency to another, for example USD to EUR")]
+        public static decimal ConvertCurrency(decimal amount, string fromCurrency, string toCurrency)
         {
-            var currencyDictionary = Currency.Currencies;
+            decimal exchangeRate = GetExchangeRate(fromCurrency, toCurrency);
+            return amount * exchangeRate;
         }
     }
     ```
 
-    이 코드에서는 **KernelFunction** 데코레이터를 사용하여 네이티브 함수를 선언합니다. 또한 **Description** 데코레이터를 사용하여 함수의 기능에 대한 설명을 추가합니다. **Currency.Currencies**를 사용하여 통화 및 환율 사전을 가져올 수 있습니다. 다음으로 지정된 금액을 한 통화에서 다른 통화로 변환하는 몇 가지 논리를 추가합니다.
+    이 코드에서는 **KernelFunction** 데코레이터를 사용하여 네이티브 함수를 선언합니다. 또한 **Description** 데코레이터를 사용하여 함수의 기능에 대한 설명을 추가합니다. 다음으로 지정된 금액을 한 통화에서 다른 통화로 변환하는 몇 가지 논리를 추가합니다.
 
-1. **ConvertAmount** 함수를 다음 코드로 수정합니다.
-
-    ```c#
-    [KernelFunction, Description("Convert an amount from one currency to another")]
-    public static string ConvertAmount(
-        [Description("The target currency code")] string targetCurrencyCode, 
-        [Description("The amount to convert")] string amount, 
-        [Description("The starting currency code")] string baseCurrencyCode)
-    {
-        var currencyDictionary = Currency.Currencies;
-        
-        Currency targetCurrency = currencyDictionary[targetCurrencyCode];
-        Currency baseCurrency = currencyDictionary[baseCurrencyCode];
-
-        if (targetCurrency == null)
-        {
-            return targetCurrencyCode + " was not found";
-        }
-        else if (baseCurrency == null)
-        {
-            return baseCurrencyCode + " was not found";
-        }
-        else
-        {
-            double amountInUSD = Double.Parse(amount) * baseCurrency.USDPerUnit;
-            double result = amountInUSD * targetCurrency.UnitsPerUSD;
-            return @$"${amount} {baseCurrencyCode} is approximately 
-                {result.ToString("C")} in {targetCurrency.Name}s ({targetCurrencyCode})";
-        }
-    }
-    ```
-
-    이 코드에서는 **Currency.Currencies** 사전을 사용하여 대상 및 기본 통화에 대한 **Currency** 개체를 가져옵니다. 그런 다음 **Currency** 개체를 사용하여 기본 통화에서 대상 통화로 금액을 변환합니다. 마지막으로, 변환된 양으로 문자열을 반환합니다. 다음으로 플러그 인을 테스트해 보겠습니다.
-
-1. **Program.cs** 파일에서 다음 코드를 사용하여 새 플러그 인 함수를 가져오고 호출합니다.
+1. **Program.cs** 파일에서 다음 코드를 사용하여 새 플러그인을 가져옵니다.
 
     ```c#
     kernel.ImportPluginFromType<CurrencyConverter>();
-    kernel.ImportPluginFromType<ConversationSummaryPlugin>();
-    var prompts = kernel.ImportPluginFromPromptDirectory("Prompts");
-
-    var result = await kernel.InvokeAsync("CurrencyConverter", 
-        "ConvertAmount", 
-        new() {
-            {"targetCurrencyCode", "USD"}, 
-            {"amount", "52000"}, 
-            {"baseCurrencyCode", "VND"}
-        }
-    );
-
-    Console.WriteLine(result);
     ```
 
-    이 코드에서는 **ImportPluginFromType** 메서드를 사용하여 플러그 인을 가져옵니다. 그런 다음 **InvokeAsync** 메서드를 사용하여 플러그 인 함수를 호출합니다. **InvokeAsync** 메서드는 플러그 인 이름, 함수 이름 및 매개 변수 사전을 사용합니다. 마지막으로 결과를 콘솔에 출력합니다. 다음으로 코드를 실행하여 작동하는지 확인합니다.
+    다음으로 플러그 인을 테스트해 보겠습니다.
 
-1. 터미널 > 새 터미널을 선택하여 터미널을 엽니다.
+1. **Program.cs** 파일을 마우스 오른쪽 단추로 클릭하고 "통합 터미널에서 열기"를 클릭합니다.
 
-1. 터미널에서 `dotnet run`를 입력합니다. 다음과 같은 출력이 표시됩니다.
+1. 터미널에서 `dotnet run`를 입력합니다. 
+
+    통화를 변환하라는 프롬프트 요청을 입력합니다(예: "홍콩에서 10달러는 얼마인가요?").
+
+    다음과 비슷한 결과가 나타나야 합니다.
 
     ```output
-    $52000 VND is approximately $2.13 in US Dollars (USD)
+    Assistant: 10 USD is equivalent to 77.70 Hong Kong dollars (HKD).
     ```
 
-    플러그 인이 제대로 작동했으므로 사용자가 변환하려는 통화와 금액을 감지할 수 있는 자연어 프롬프트를 만들어 보겠습니다.
+## 연습 2: 핸들바 프롬프트 만들기
 
-### 작업 3: 프롬프트를 사용하여 사용자 입력 구문 분석
-
-이 작업에서는 사용자의 입력을 구문 분석하여 변환할 대상 통화, 기본 통화 및 금액을 식별하는 프롬프트를 만듭니다.
-
-1. **Prompts** 폴더에 **GetTargetCurrencies**라는 새 폴더 만들기
-
-1. **GetTargetCurrencies** 폴더에서 **config.json**이라는 새 파일을 만들기
-
-1. **config.json** 파일에 다음 텍스트를 입력합니다.
-
-    ```output
-    {
-        "schema": 1,
-        "type": "completion",
-        "description": "Identify the target currency, base currency, and amount to convert",
-        "execution_settings": {
-            "default": {
-                "max_tokens": 800,
-                "temperature": 0
-            }
-        },
-        "input_variables": [
-            {
-                "name": "input",
-                "description": "Text describing some currency amount to convert",
-                "required": true
-            }
-        ]
-    }
-    ```
-
-1. **GetTargetCurrencies** 폴더에서 **skprompt.txt**라는 새 파일을 만들기
-
-1. **skprompt.txt** 파일에 다음 텍스트를 입력합니다.
-
-    ```html
-    <message role="system">Identify the target currency, base currency, and 
-    amount from the user's input in the format target|base|amount</message>
-
-    For example: 
-
-    <message role="user">How much in GBP is 750.000 VND?</message>
-    <message role="assistant">GBP|VND|750000</message>
-
-    <message role="user">How much is 60 USD in New Zealand Dollars?</message>
-    <message role="assistant">NZD|USD|60</message>
-
-    <message role="user">How many Korean Won is 33,000 yen?</message>
-    <message role="assistant">KRW|JPY|33000</message>
-
-    <message role="user">{{$input}}</message>
-    <message role="assistant">target|base|amount</message>
-    ```
-
-### 작업 4: 작업 확인
-
-이 작업에서는 애플리케이션을 실행하고 코드가 올바르게 작동하는지 확인합니다. 
-
-1. 다음 코드로 **Program.cs** 파일을 업데이트하여 새 프롬프트를 테스트합니다.
-
-    ```c#
-    kernel.ImportPluginFromType<CurrencyConverter>();
-    kernel.ImportPluginFromType<ConversationSummaryPlugin>();
-    var prompts = kernel.ImportPluginFromPromptDirectory("Prompts");
-
-    var result = await kernel.InvokeAsync(prompts["GetTargetCurrencies"],
-        new() {
-            {"input", "How many Australian Dollars is 140,000 Korean Won worth?"}
-        }
-    );
-
-    Console.WriteLine(result);
-    ```
-
-1. 터미널에 `dotnet run`을 입력합니다. 다음과 같은 출력이 표시됩니다.
-
-    ```output
-    AUD|KRW|140000
-    ```
-
-    > [!NOTE]
-    > 코드가 예상한 결과를 생성하지 못하는 경우 **솔루션** 폴더에서 코드를 검토할 수 있습니다. 더 정확한 결과를 생성하려면 **skprompt.txt** 파일에서 프롬프트를 조정해야 할 수 있습니다.
-
-이제 한 통화에서 다른 통화로 금액을 변환할 수 있는 플러그 인과 사용자의 입력을 **ConvertAmount** 함수에서 사용할 수 있는 형식으로 구문 분석하는 데 사용할 수 있는 프롬프트가 있습니다. 이렇게 하면 사용자가 AI 여행사를 사용하여 통화 금액을 쉽게 변환할 수 있습니다.
-
-## 연습 2: 사용자 의도에 따라 플러그 인 선택 자동화
-
-이 연습에서는 사용자의 의도를 검색하고 대화를 원하는 플러그 인으로 라우팅합니다. 제공된 플러그 인을 사용하여 사용자의 의도를 검색할 수 있습니다. 그럼 시작하겠습니다.
+이 연습에서는 핸드바 프롬프트에서 함수를 생성합니다. 이 함수는 LLM에게 사용자를 위한 여행 일정을 만들도록 요청합니다. 그럼 시작하겠습니다.
 
 **예상 연습 완료 시간**: 10분
 
-### 작업 1: GetIntent 플러그 인 사용
+### 작업 1: 핸들바 프롬프트에서 함수 만들기
+
+1. **Program.cs** 파일에 다음 `using` 지시문을 추가합니다.
+
+    `using Microsoft.SemanticKernel.PromptTemplates.Handlebars;`
 
 1. **Program.cs** 파일을 다음 코드로 업데이트합니다.
 
     ```c#
-    kernel.ImportPluginFromType<CurrencyConverter>();
-    kernel.ImportPluginFromType<ConversationSummaryPlugin>();
-    var prompts = kernel.ImportPluginFromPromptDirectory("Prompts");
+    kernel.ImportPluginFromType<CurrencyConverterPlugin>();
 
-    Console.WriteLine("What would you like to do?");
-    var input = Console.ReadLine();
-
-    var intent = await kernel.InvokeAsync<string>(
-        prompts["GetIntent"], 
-        new() {{ "input",  input }}
-    );
-
+    string hbprompt = """
+        <message role="system">Instructions: Before providing the the user with a travel itenerary, ask how many days their trip is</message>
+        <message role="user">I'm going to {{city}}. Can you create an itenerary for me?</message>
+        <message role="assistant">Sure, how many days is your trip?</message>
+        <message role="user">{{input}}</message>
+        <message role="assistant">
+        """;
     ```
 
-    이 코드에서는 **GetIntent** 프롬프트를 사용하여 사용자의 의도를 검색합니다. 그런 다음 **intent**라는 변수에 의도를 저장합니다. 다음으로 의도를 **CurrencyConverter** 플러그 인으로 라우팅합니다.
+    이 코드에서는 핸들바 템플릿 형식을 사용하여 퓨샷 프롬프트를 만듭니다. 프롬프트는 여행 일정을 만들기 전에 모델이 사용자로부터 더 많은 정보를 얻도록 안내합니다.
 
-1. `Program.cs` 파일에 다음 코드를 추가합니다.
-
-    ```c#
-    switch (intent) {
-        case "ConvertCurrency": 
-            var currencyText = await kernel.InvokeAsync<string>(
-                prompts["GetTargetCurrencies"], 
-                new() {{ "input",  input }}
-            );
-            var currencyInfo = currencyText!.Split("|");
-            var result = await kernel.InvokeAsync("CurrencyConverter", 
-                "ConvertAmount", 
-                new() {
-                    {"targetCurrencyCode", currencyInfo[0]}, 
-                    {"baseCurrencyCode", currencyInfo[1]},
-                    {"amount", currencyInfo[2]}, 
-                }
-            );
-            Console.WriteLine(result);
-            break;
-        default:
-            Console.WriteLine("Other intent detected");
-            break;
-    }
-    ```
-
-    **GetIntent** 플러그 인은 다음 값을 반환합니다. ConvertCurrency, SuggestDestinations, SuggestActivities, Translate, HelpfulPhrases, Unknown. **switch** 문을 사용하여 사용자의 의도를 적절한 플러그 인으로 라우팅합니다. 
-    
-    사용자의 의도가 통화를 환산하는 것이라면 **GetTargetCurrencies** 프롬프트를 사용하여 통화 정보를 검색합니다. 그런 다음 **CurrencyConverter** 플러그 인을 사용하여 금액을 변환합니다.
-
-    다음으로 다른 의도를 처리하기 위해 몇 가지 사례를 추가합니다. 지금은 의미 체계 커널 SDK의 자동 함수 호출 기능을 사용하여 의도를 사용 가능한 플러그 인으로 라우팅해 보겠습니다.
-
-1. **Program.cs** 파일에 다음 코드를 추가하여 자동 함수 호출 설정을 만듭니다.
+1. 다음 코드를 **Program.cs** 파일에 추가합니다.
 
     ```c#
-    kernel.ImportPluginFromType<CurrencyConverter>();
-    kernel.ImportPluginFromType<ConversationSummaryPlugin>();
-    var prompts = kernel.ImportPluginFromPromptDirectory("Prompts");
-
-    OpenAIPromptExecutionSettings settings = new()
+    // Create the prompt template config using handlebars format
+    var templateFactory = new HandlebarsPromptTemplateFactory();
+    var promptTemplateConfig = new PromptTemplateConfig()
     {
-        ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
+        Template = hbprompt,
+        TemplateFormat = "handlebars",
+        Name = "GetItenerary",
     };
 
-    Console.WriteLine("What would you like to do?");
-    var input = Console.ReadLine();
-    var intent = await kernel.InvokeAsync<string>(
-        prompts["GetIntent"], 
-        new() {{ "input",  input }}
-    );
+    // Create a plugin from the prompt
+    var promptFunction = kernel.CreateFunctionFromPrompt(promptTemplateConfig, templateFactory);
+    var iteneraryPlugin = kernel.CreatePluginFromFunctions("TravelItenerary", [promptFunction]);
+
+    // Add the new plugin to the kernel
+    kernel.Plugins.Add(iteneraryPlugin);
     ```
 
-    다음으로 다른 의도에 대한 스위치 문에 사례를 추가합니다.
+    이 코드에서는 프롬프트에서 핸들바 템플릿 구성을 만듭니다. 그런 다음 프롬프트에 대한 플러그 인 함수를 만들어 커널에 추가합니다. 이제 함수를 호출할 준비가 되었습니다.
 
-1. **Program.cs** 파일을 다음 코드로 업데이트합니다.
+1. 터미널에 `dotnet run`을 입력하여 코드를 실행합니다.
+
+    다음 입력을 시도하여 LLM에 반복을 요청합니다.
+
+    ```output
+    Assistant: How may I help you?
+    User: I'm going to Hong Kong, can you create an itenerary for me?
+    Assistant: Sure! How many days will you be staying in Hong Kong?
+    User: 10
+    Assistant: Great! Here's a 10-day itinerary for your trip to Hong Kong:
+    ...
+    ```
+
+    이제 AI 여행 도우미의 시작이 갖춰졌습니다. 프롬프트 및 플러그 인을 사용하여 더 많은 기능을 추가해 보겠습니다.
+
+1.  다음 코드를 **Program.cs** 파일에 추가합니다.
 
     ```c#
-    switch (intent) {
-        case "ConvertCurrency": 
-            // ...Code you entered previously...
-            break;
-        case "SuggestDestinations":
-        case "SuggestActivities":
-        case "HelpfulPhrases":
-        case "Translate":
-            var autoInvokeResult = await kernel.InvokePromptAsync(input!, new(settings));
-            Console.WriteLine(autoInvokeResult);
-            break;
-        default:
-            Console.WriteLine("Other intent detected");
-            break;
-    }
+    kernel.ImportPluginFromType<CurrencyConverterPlugin>();
+    kernel.ImportPluginFromType<FlightBookingPlugin>();
     ```
 
-    이 코드에서는 **AutoInvokeKernelFunctions** 설정을 사용하여 커널에서 참조되는 함수와 프롬프트를 자동으로 호출합니다. 사용자의 의도가 통화 환산이라면 **CurrencyConverter** 플러그 인이 해당 작업을 수행합니다. 
+    이 플러그인은 모의 세부 정보가 포함된 **flights.json** 파일을 사용하여 항공편 예약을 시뮬레이션합니다. 다음으로 도우미에 몇 가지 추가 시스템 프롬프트를 추가합니다.
+
+1.  다음 코드를 **Program.cs** 파일에 추가합니다.
+
+    ```c#
+    // Setup the assistant chat
+    var history = new ChatHistory();
+    history.AddSystemMessage("The current date is 01/10/2025");
+    history.AddSystemMessage("You are a helpful travel assistant.");
+    history.AddSystemMessage("Before providing destination recommendations, ask the user about their budget.");
+    ```
+
+    이러한 프롬프트는 원활한 사용자 경험을 만들며, 항공편 예약 플러그인을 시뮬레이션하는 데 도움이 됩니다. 이제 코드를 테스트할 준비가 되었습니다.
+
+1. 터미널에 `dotnet run`을 입력합니다.
+
+    다음 프롬프트 중 일부를 입력해 보세요.
+
+    ```output
+    1. Can you give me some destination recommendations for Europe?
+    2. I want to go to Barcelona, can you create an itenerary for me?
+    3. How many Euros is 100 USD?
+    4. Can you book me a flight to Barcelona?
+    ```
+
+    다른 입력을 시도하고 여행 도우미가 어떻게 응답하는지 확인합니다.
+
+## 연습 3: 작업에 대한 사용자 동의 필요
+
+이 연습에서는 에이전트가 사용자를 대신하여 항공편을 예약하기 전에 사용자의 승인을 요청하는 필터 호출 함수를 추가합니다. 그럼 시작하겠습니다.
+
+### 작업 1: 함수 호출 필터 만들기
+
+1. **PermissionFilter.cs**라는 이름의 새 파일을 만듭니다.
+
+1. 새 에서 다음 코드를 입력합니다.
+
+    ```c#
+    #pragma warning disable SKEXP0001 
+    using Microsoft.SemanticKernel;
     
-    사용자의 의도가 대상 또는 작업 제안을 가져오거나, 구를 번역하거나, 특정 언어로 유용한 구를 가져오는 것인 경우, **AutoInvokeKernelFunctions** 설정은 프로젝트 코드에 포함된 기존 플러그 인을 자동으로 호출합니다.
-
-    이러한 의도 사례에 속하지 않는 경우 사용자 입력을 LLM(대규모 언어 모델)에 대한 프롬프트로 실행하는 코드를 추가할 수도 있습니다.
-
-1. 다음 코드를 사용하여 기본 사례를 업데이트합니다.
-
-    ```c#
-    default:
-        Console.WriteLine("Sure, I can help with that.");
-        var otherIntentResult = await kernel.InvokePromptAsync(input!, new(settings));
-        Console.WriteLine(otherIntentResult);
-        break;
-    ```
-
-    이제 사용자가 다른 의도를 갖고 있는 경우 LLM이 사용자의 요청을 처리할 수 있습니다. 시도해 보기:
-
-### 작업 2: 작업 확인
-
-이 작업에서는 애플리케이션을 실행하고 코드가 올바르게 작동하는지 확인합니다. 
-
-1. 터미널에 `dotnet run`을 입력합니다. 메시지가 표시되면 다음 프롬프트와 유사한 텍스트를 입력합니다.
-
-    ```output
-    What would you like to do?
-    How many TTD is 50 Qatari Riyals?    
-    ```
-
-1. 다음 응답과 유사한 출력이 표시됩니다.
-
-    ```output
-    $50 QAR is approximately $93.10 in Trinidadian Dollars (TTD)
-    ```
-
-1. 터미널에 `dotnet run`을 입력합니다. 메시지가 표시되면 다음 프롬프트와 유사한 텍스트를 입력합니다.
-
-    ```output
-    What would you like to do?
-    I want to go somewhere that has lots of warm sunny beaches and delicious, spicy food!
-    ```
-
-1. 다음 응답과 유사한 출력이 표시됩니다.
-
-    ```output
-    Based on your preferences for warm sunny beaches and delicious, spicy food, I have a few destination recommendations for you:
-
-    1. Thailand: Known for its stunning beaches, Thailand offers a perfect combination of relaxation and adventure. You can visit popular beach destinations like Phuket, Krabi, or Koh Samui, where you'll find crystal-clear waters and white sandy shores. Thai cuisine is famous for its spiciness, so you'll have plenty of mouthwatering options to try, such as Tom Yum soup, Pad Thai, and Green Curry.
-
-    2. Mexico: Mexico is renowned for its beautiful coastal regions and vibrant culture. You can explore destinations like Cancun, Playa del Carmen, or Tulum, which boast stunning beaches along the Caribbean Sea. Mexican cuisine is rich in flavors and spices, offering a wide variety of dishes like tacos, enchiladas, and mole sauces that will satisfy your craving for spicy food.
-
-    ...
-
-    These destinations offer a perfect blend of warm sunny beaches and delicious, spicy food, ensuring a memorable trip for you. Let me know if you need any further assistance or if you have any specific preferences for your trip!
-    ```
-
-1. 터미널에 `dotnet run`을 입력합니다. 메시지가 표시되면 다음 프롬프트와 유사한 텍스트를 입력합니다.
-
-    ```output
-    What would you like to do?
-    Can you give me a recipe for chicken satay?
-
-1. You should see a response similar to the following response:
-
-    ```output
-    Sure, I can help with that.
-    Certainly! Here's a recipe for chicken satay:
-
-    ...
-    ```
-
-    의도는 기본 사례로 라우팅되어야 하며 LLM은 치킨 사테 레시피 요청을 처리해야 합니다.
-
-    > [!NOTE]
-    > 코드가 예상한 결과를 생성하지 못하는 경우 **Solution** 폴더에서 코드를 검토할 수 있습니다.
-
-다음으로 특정 플러그 인에 일부 대화 기록을 제공하도록 라우팅 논리를 수정해 보겠습니다. 기록을 제공하면 플러그 인이 사용자 요청에 대해 보다 상황에 맞는 응답을 검색할 수 있습니다.
-
-### 작업 3: 전체 플러그 인 라우팅
-
-이 연습에서는 대화 기록을 사용하여 LLM(대규모 언어 모델)에 컨텍스트를 제공합니다. 또한 실제 챗봇처럼 사용자가 대화를 계속할 수 있도록 코드를 조정합니다. 그럼 시작하겠습니다.
-
-1. 사용자의 입력을 받아들이기 위해 do-while 루프를 사용하도록 코드를 수정합니다.
-
-    ```c#
-    string input;
-
-    do 
+    public class PermissionFilter : IFunctionInvocationFilter
     {
-        Console.WriteLine("What would you like to do?");
-        input = Console.ReadLine();
-
-        // ...
+        public async Task OnFunctionInvocationAsync(FunctionInvocationContext context, Func<FunctionInvocationContext, Task> next)
+        {
+            
+        }
     }
-    while (!string.IsNullOrWhiteSpace(input));
     ```
 
-    이제 사용자가 빈 줄을 입력할 때까지 대화를 계속할 수 있습니다.
+    >[!NOTE] 
+    > 의미 체계 커널 SDK의 버전 1.30.0에서는 함수 필터가 변경될 수 있으며 경고 표시 안 됨이 필요합니다. 
 
-1. **SuggestDestinations** 사례를 수정하여 사용자 여행에 대한 세부 정보를 캡처합니다.
+    이 코드에서는 `IFunctionInvocationFilter` 인터페이스를 구현합니다. 이 `OnFunctionInvocationAsync` 메서드는 AI 에이전트에서 함수를 호출할 때마다 항상 호출됩니다.
 
-    ```c#
-    case "SuggestDestinations":
-        chatHistory.AppendLine("User:" + input);
-        var recommendations = await kernel.InvokePromptAsync(input!);
-        Console.WriteLine(recommendations);
-        break;
-    ```
-
-1. 다음 코드와 함께 **SuggestActivities** 사례의 여행 세부 정보를 사용합니다.
+1. 다음 코드를 추가하여 함수가 `book_flight` 호출되는 시기를 검색합니다.
 
     ```c#
-     case "SuggestActivities":
-        var chatSummary = await kernel.InvokeAsync(
-            "ConversationSummaryPlugin", 
-            "SummarizeConversation", 
-            new() {{ "input", chatHistory.ToString() }});
-        break;
-    ```
-
-    이 코드에서는 기본 제공된 **SummarizeConversation** 함수를 사용하여 사용자와의 채팅을 요약합니다. 다음으로 요약을 활용하여 대상에서의 작업을 제안해 보겠습니다.
-
-1. 다음 코드를 사용하여 **SuggestActivities** 사례를 확장합니다.
-
-    ```c#
-    var activities = await kernel.InvokePromptAsync(
-        input,
-        new () {
-            {"input", input},
-            {"history", chatSummary},
-            {"ToolCallBehavior", ToolCallBehavior.AutoInvokeKernelFunctions}
-    });
-
-    chatHistory.AppendLine("User:" + input);
-    chatHistory.AppendLine("Assistant:" + activities.ToString());
+    if ((context.Function.PluginName == "FlightBooking" && context.Function.Name == "book_flight"))
+    {
     
-    Console.WriteLine(activities);
-    break;
+    }
+
+    await next(context);
     ```
 
-    이 코드에서는 **input** 및 **chatSummary**를 커널 인수로 추가합니다. 그런 다음 커널은 프롬프트를 호출하고 이를 **SuggestActivities** 플러그 인으로 라우팅합니다. 또한 사용자의 입력과 도우미의 응답을 채팅 기록에 추가하고 결과를 표시합니다. 다음으로, **SuggestActivities** 플러그 인에 **chatSummary** 변수를 추가해야 합니다.
+    이 코드는 `FunctionInvocationContext`을(를) 사용하여 어떤 플러그 인과 함수가 호출되었는지 확인합니다.
 
-1. **Prompts/SuggestActivities/config.json**으로 이동하여 Visual Studio Code에서 파일을 엽니다.
-
-1. **input_variables** 아래에 채팅 기록에 대한 변수를 추가합니다.
-
-    ```json
-    "input_variables": [
-      {
-          "name": "history",
-          "description": "Some background information about the user",
-          "required": false
-      },
-      {
-          "name": "destination",
-          "description": "The destination a user wants to visit",
-          "required": true
-      }
-   ]
-   ```
-
-1. **Prompts/SuggestActivities/skprompt.txt**로 이동하여 파일을 엽니다.
-
-1. 프롬프트의 처음 절반을 채팅 기록 변수를 사용하는 다음 프롬프트로 바꿉니다.
-
-    ```html 
-    You are an experienced travel agent. 
-    You are helpful, creative, and very friendly. 
-    Consider the traveler's background: {{$history}}
-    ```
-
-    프롬프트의 나머지 부분은 그대로 둡니다. 이제 플러그 인은 채팅 기록을 사용하여 LLM에 컨텍스트를 제공합니다.
-
-### 작업 4: 작업 확인
-
-이 작업에서는 애플리케이션을 실행하고 코드가 올바르게 작동하는지 확인합니다.
-
-1. 업데이트된 스위치 사례를 다음 코드와 비교합니다.
+1. 항공편을 예약하기 위한 사용자의 허가를 요청하려면 다음 논리를 추가합니다.
 
     ```c#
-    case "SuggestDestinations":
-            chatHistory.AppendLine("User:" + input);
-            var recommendations = await kernel.InvokePromptAsync(input!);
-            Console.WriteLine(recommendations);
-            break;
-    case "SuggestActivities":
+    if ((context.Function.PluginName == "FlightBooking" && context.Function.Name == "book_flight"))
+    {
+        Console.WriteLine("System Message: The agent requires an approval to complete this operation. Do you approve (Y/N)");
+        Console.Write("User: ");
+        string shouldProceed = Console.ReadLine()!;
 
-        var chatSummary = await kernel.InvokeAsync(
-            "ConversationSummaryPlugin", 
-            "SummarizeConversation", 
-            new() {{ "input", chatHistory.ToString() }});
+        if (shouldProceed != "Y")
+        {
+            context.Result = new FunctionResult(context.Result, "The operation was not approved by the user");
+            return;
+        }
+    }
 
-        var activities = await kernel.InvokePromptAsync(
-            input!,
-            new () {
-                {"input", input},
-                {"history", chatSummary},
-                {"ToolCallBehavior", ToolCallBehavior.AutoInvokeKernelFunctions}
-        });
-
-        chatHistory.AppendLine("User:" + input);
-        chatHistory.AppendLine("Assistant:" + activities.ToString());
-        
-        Console.WriteLine(activities);
-        break;
+    await next(context);
     ```
 
-1. 터미널에 `dotnet run`을 입력합니다. 메시지가 표시되면 다음과 유사한 텍스트를 입력합니다.
+1. **Program.cs** 파일로 이동합니다.
+
+1. 다음 코드를 사용하여 커널에 권한 필터를 추가합니다.
+
+    ```c#
+    kernel.ImportPluginFromType<CurrencyConverterPlugin>();
+    kernel.ImportPluginFromType<FlightBookingPlugin>();
+    kernel.FunctionInvocationFilters.Add(new PermissionFilter());
+    ```
+
+1. 터미널에 `dotnet run`을 입력합니다.
+
+    항공 예약하라는 프롬프트를 입력합니다. 다음과 유사한 응답이 표시됩니다.
 
     ```output
-    What would you like to do?
-    How much is 60 USD in new zealand dollars?
+    User: Find me a flight to Tokyo on the 19
+    Assistant: I found a flight to Tokyo on the 19th of January. The flight is with Air Japan and the price is $1200.
+    User: Y
+    System Message: The agent requires an approval to complete this operation. Do you approve (Y/N)
+    User: N
+    Assistant: I'm sorry, but I am unable to book the flight for you.
     ```
 
-1. 다음과 유사한 출력이 표시됩니다.
-
-    ```output
-    $60 USD is approximately $97.88 in New Zealand Dollars (NZD)
-    What would you like to do?
-    ```
-
-1. 몇 가지 상황 신호와 함께 대상 제안에 대한 프롬프트를 입력합니다. 예를 들면 다음과 같습니다.
-
-    ```output
-    What would you like to do?
-    I'm planning an anniversary trip with my spouse, but they are currently using a wheelchair and accessibility is a must. What are some destinations that would be romantic for us?
-    ```
-
-1. 액세스 가능한 대상에 대한 권장 사항이 포함된 일부 출력을 받아야 합니다.
-
-1. 작업 제안에 대한 프롬프트를 입력합니다. 예:
-
-    ```output
-    What would you like to do?
-    What are some things to do in Barcelona?
-    ```
-
-1. 예를 들어, 다음과 유사한 바르셀로나에서 액세스 가능한 작업과 같이 이전 상황에 맞는 권장 사항을 받아야 합니다.
-
-    ```output
-    1. Visit the iconic Sagrada Família: This breathtaking basilica is an iconic symbol of Barcelona's architecture and is known for its unique design by Antoni Gaudí.
-
-    2. Explore Park Güell: Another masterpiece by Gaudí, this park offers stunning panoramic views of the city, intricate mosaic work, and whimsical architectural elements.
-
-    3. Visit the Picasso Museum: Explore the extensive collection of artworks by the iconic painter Pablo Picasso, showcasing his different periods and styles.
-    ```
-
-    > [!NOTE]
-    > 코드가 예상한 결과를 생성하지 못하는 경우 **솔루션** 폴더에서 코드를 검토할 수 있습니다.
-
-다양한 프롬프트와 상황 신호를 사용하여 애플리케이션을 계속 테스트할 수 있습니다. 잘하셨습니다. LLM에 상황 신호를 성공적으로 제공하고 사용자가 대화를 계속할 수 있도록 코드를 조정했습니다.
+    에이전트는 예약을 진행하기 전에 사용자 승인을 받아야 합니다.
 
 ### 검토
 
-이 랩에서는 LLM(대규모 언어 모델) 서비스에 대한 엔드포인트를 만들고, 의미 체계 커널 개체를 빌드하고, 의미 체계 커널 SDK를 사용하여 프롬프트를 실행하고, 의미 체계 커널 함수 및 플러그 인을 만들고, 의미 체계 커널 SDK의 자동 함수 호출 기능을 사용하여 사용자의 의도를 적절한 플러그 인으로 라우팅했습니다. 또한 대화 기록을 사용하여 LLM에 컨텍스트를 제공하고 사용자가 대화를 계속할 수 있도록 했습니다. 이 랩을 완료해 주셔서 감사합니다!
+이 랩에서는 LLM(대규모 언어 모델) 서비스에 대한 엔드포인트를 만들고, 의미 체계 커널 개체를 빌드하고, 의미 체계 커널 SDK를 사용하여 프롬프트를 실행했습니다. 또한, 모델을 안내하기 위해 플러그인을 만들고 시스템 메시지를 활용했습니다. 축하합니다. 랩을 완료했습니다.
