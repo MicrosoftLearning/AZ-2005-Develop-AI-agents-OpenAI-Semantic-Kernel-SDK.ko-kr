@@ -4,14 +4,14 @@ lab:
   module: 'Module 01: Build your kernel'
 ---
 
-# 랩: AI 여행사 완료
+# 랩: AI 여행 도우미 완성하기
 # 학생용 랩 매뉴얼
 
-이 랩에서는 의미 체계 커널 SDK를 사용하여 AI 여행사를 완료합니다. LLM(대규모 언어 모델) 서비스를 위한 엔드포인트를 만들고, 의미 체계 커널 함수를 만들고, 의미 체계 커널 SDK의 자동 함수 호출 기능을 사용하여 사용자의 의도를 제공된 일부 사전 빌드된 플러그인을 포함한 적절한 플러그인으로 라우팅합니다. 또한 대화 기록을 사용하여 LLM에 컨텍스트를 제공하고 사용자가 대화를 계속할 수 있도록 합니다.
+이 랩에서는 의미 체계 커널 SDK를 사용하여 AI 여행 도우미를 완료합니다. LLM(대규모 언어 모델) 서비스를 위한 엔드포인트를 만들고, 의미 체계 커널 함수를 만들고, 의미 체계 커널 SDK의 자동 함수 호출 기능을 사용하여 사용자의 의도를 제공된 일부 사전 빌드된 플러그인을 포함한 적절한 플러그인으로 라우팅합니다. 또한 대화 기록을 사용하여 LLM에 컨텍스트를 제공하고 사용자가 대화를 계속할 수 있도록 합니다.
 
 ## 랩 시나리오
 
-여러분은 고객을 위한 맞춤형 여행 환경을 만드는 것을 전문으로 하는 여행사의 개발자입니다. 고객이 여행 목적지에 대해 자세히 알아보고 여행을 위한 활동을 계획하는 데 도움이 되는 AI 여행사를 만드는 임무를 맡았습니다. AI 여행사는 통화 금액을 변환하고, 목적지 및 활동을 제안하고, 다양한 언어로 유용한 문구를 제공하고, 문구를 번역할 수 있어야 합니다. 또한 AI 여행사는 대화 기록을 사용하여 사용자의 요청에 대한 상황별 관련 응답을 제공할 수 있어야 합니다.
+여러분은 고객을 위한 맞춤형 여행 환경을 만드는 것을 전문으로 하는 여행사의 개발자입니다. 고객이 여행 목적지에 대해 자세히 알아보고 여행을 위한 활동을 계획하는 데 도움이 되는 AI 여행 도우미를 만드는 임무를 맡았습니다. AI 여행 도우미는 통화 금액을 변환하고, 목적지 및 활동을 제안하고, 다양한 언어로 유용한 문구를 제공하고, 문구를 번역할 수 있어야 합니다. 또한 AI 여행 도우미는 대화 기록을 사용하여 사용자의 요청에 대한 상황별 관련 응답을 제공할 수 있어야 합니다.
 
 ## 목표
 
@@ -92,7 +92,7 @@ lab:
 
 ### 작업 2: 네이티브 플러그 인 만들기
 
-이 작업에서는 기본 통화에서 대상 통화로 금액을 변환할 수 있는 네이티브 함수 플러그 인을 만듭니다.
+이 작업에서는 기본 통화에서 대상 통화로 금액을 변환할 수 있는 네이티브 함수 플러그인을 만듭니다.
 
 1. Visual Studio Code 프로젝트로 돌아갑니다.
 
@@ -106,29 +106,30 @@ lab:
     }
     ```
 
-1. **Plugins/ConvertCurrency** 폴더에 있는 **CurrencyConverter.cs**라는 파일로 이동합니다.
+1. **Plugins** 폴더에서 **CurrencyConverterPlugin.cs**라는 파일로 이동합니다.
 
-1. **CurrencyConverter.cs** 파일에서 다음 코드를 추가하여 플러그 인 함수를 만듭니다.
+1. **CurrencyConverterPlugin.cs** 파일에서 **환율을 가져오는 커널 함수 만들기** 주석 아래에 다음 코드를 추가합니다.
 
     ```c#
-    class CurrencyConverter
+    // Create a kernel function that gets the exchange rate
+    [KernelFunction("convert_currency")]
+    [Description("Converts an amount from one currency to another, for example USD to EUR")]
+    public static decimal ConvertCurrency(decimal amount, string fromCurrency, string toCurrency)
     {
-        [KernelFunction("convert_currency")]
-        [Description("Converts an amount from one currency to another, for example USD to EUR")]
-        public static decimal ConvertCurrency(decimal amount, string fromCurrency, string toCurrency)
-        {
-            decimal exchangeRate = GetExchangeRate(fromCurrency, toCurrency);
-            return amount * exchangeRate;
-        }
+        decimal exchangeRate = GetExchangeRate(fromCurrency, toCurrency);
+        return amount * exchangeRate;
     }
     ```
 
     이 코드에서는 **KernelFunction** 데코레이터를 사용하여 네이티브 함수를 선언합니다. 또한 **Description** 데코레이터를 사용하여 함수의 기능에 대한 설명을 추가합니다. 다음으로 지정된 금액을 한 통화에서 다른 통화로 변환하는 몇 가지 논리를 추가합니다.
 
-1. **Program.cs** 파일에서 다음 코드를 사용하여 새 플러그인을 가져옵니다.
+1. **Program.cs** 파일을 엽니다.
+
+1. **커널에 플러그인 추가** 주석 아래에 있는 환율 계산 플러그인을 가져옵니다.
 
     ```c#
-    kernel.ImportPluginFromType<CurrencyConverter>();
+    // Add plugins to the kernel
+    kernel.ImportPluginFromType<CurrencyConverterPlugin>();
     ```
 
     다음으로 플러그 인을 테스트해 보겠습니다.
@@ -147,7 +148,7 @@ lab:
 
 ## 연습 2: 핸들바 프롬프트 만들기
 
-이 연습에서는 핸드바 프롬프트에서 함수를 생성합니다. 이 함수는 LLM에게 사용자를 위한 여행 일정을 만들도록 요청합니다. 그럼 시작하겠습니다.
+이 연습에서는 핸드바 프롬프트에서 함수를 생성합니다. 이 함수는 LLM에 사용자를 위한 여행 여정을 만들도록 요청합니다. 그럼 시작하겠습니다.
 
 **예상 연습 완료 시간**: 10분
 
@@ -157,23 +158,22 @@ lab:
 
     `using Microsoft.SemanticKernel.PromptTemplates.Handlebars;`
 
-1. **Program.cs** 파일을 다음 코드로 업데이트합니다.
+1. **핸들바 프롬프트 만들기** 주석 아래에 다음 코드를 추가합니다.
 
     ```c#
-    kernel.ImportPluginFromType<CurrencyConverterPlugin>();
-
+    // Create a handlebars prompt
     string hbprompt = """
-        <message role="system">Instructions: Before providing the the user with a travel itenerary, ask how many days their trip is</message>
-        <message role="user">I'm going to {{city}}. Can you create an itenerary for me?</message>
+        <message role="system">Instructions: Before providing the user with a travel itinerary, ask how many days their trip is</message>
+        <message role="user">I'm going to {{city}}. Can you create an itinerary for me?</message>
         <message role="assistant">Sure, how many days is your trip?</message>
         <message role="user">{{input}}</message>
         <message role="assistant">
         """;
     ```
 
-    이 코드에서는 핸들바 템플릿 형식을 사용하여 퓨샷 프롬프트를 만듭니다. 프롬프트는 여행 일정을 만들기 전에 모델이 사용자로부터 더 많은 정보를 얻도록 안내합니다.
+    이 코드에서는 핸들바 템플릿 형식을 사용하여 퓨샷 프롬프트를 만듭니다. 프롬프트는 여행 여정을 만들기 전에 모델이 사용자로부터 더 많은 정보를 검색하도록 안내합니다.
 
-1. 다음 코드를 **Program.cs** 파일에 추가합니다.
+1. **핸들바 형식을 사용하여 프롬프트 템플릿 구성 만들기** 주석 아래에 다음 코드를 추가합니다.
 
     ```c#
     // Create the prompt template config using handlebars format
@@ -182,26 +182,30 @@ lab:
     {
         Template = hbprompt,
         TemplateFormat = "handlebars",
-        Name = "GetItenerary",
+        Name = "GetItinerary",
     };
-
-    // Create a plugin from the prompt
-    var promptFunction = kernel.CreateFunctionFromPrompt(promptTemplateConfig, templateFactory);
-    var iteneraryPlugin = kernel.CreatePluginFromFunctions("TravelItenerary", [promptFunction]);
-
-    // Add the new plugin to the kernel
-    kernel.Plugins.Add(iteneraryPlugin);
     ```
 
-    이 코드에서는 프롬프트에서 핸들바 템플릿 구성을 만듭니다. 그런 다음 프롬프트에 대한 플러그 인 함수를 만들어 커널에 추가합니다. 이제 함수를 호출할 준비가 되었습니다.
+    이 코드에서는 프롬프트에서 핸들바 템플릿 구성을 만듭니다. 이를 사용하여 플러그 인 함수를 만들 수 있습니다.
+
+1. **프롬프트에서 플러그인 함수 만들기** 주석 아래에 다음 코드를 추가합니다. 
+
+    ```c#
+    // Create a plugin function from the prompt
+    var promptFunction = kernel.CreateFunctionFromPrompt(promptTemplateConfig, templateFactory);
+    var itineraryPlugin = kernel.CreatePluginFromFunctions("TravelItinerary", [promptFunction]);
+    kernel.Plugins.Add(itineraryPlugin);
+    ```
+
+    그런 다음 프롬프트에 대한 플러그 인 함수를 만들어 커널에 추가합니다. 이제 함수를 호출할 준비가 되었습니다.
 
 1. 터미널에 `dotnet run`을 입력하여 코드를 실행합니다.
 
-    다음 입력을 시도하여 LLM에 반복을 요청합니다.
+    다음 입력을 사용하여 LLM에 여정을 생성하도록 프롬프트를 입력합니다.
 
     ```output
     Assistant: How may I help you?
-    User: I'm going to Hong Kong, can you create an itenerary for me?
+    User: I'm going to Hong Kong, can you create an itinerary for me?
     Assistant: Sure! How many days will you be staying in Hong Kong?
     User: 10
     Assistant: Great! Here's a 10-day itinerary for your trip to Hong Kong:
@@ -210,20 +214,20 @@ lab:
 
     이제 AI 여행 도우미의 시작이 갖춰졌습니다. 프롬프트 및 플러그 인을 사용하여 더 많은 기능을 추가해 보겠습니다.
 
-1.  다음 코드를 **Program.cs** 파일에 추가합니다.
+1.  **커널에 플러그인 추가** 주석 아래에 항공편 예약 플러그인을 추가합니다.
 
     ```c#
+    // Add plugins to the kernel
     kernel.ImportPluginFromType<CurrencyConverterPlugin>();
     kernel.ImportPluginFromType<FlightBookingPlugin>();
     ```
 
     이 플러그인은 모의 세부 정보가 포함된 **flights.json** 파일을 사용하여 항공편 예약을 시뮬레이션합니다. 다음으로 도우미에 몇 가지 추가 시스템 프롬프트를 추가합니다.
 
-1.  다음 코드를 **Program.cs** 파일에 추가합니다.
+1.  **채팅에 시스템 메시지 추가** 주석 아래에 다음 코드를 추가합니다.
 
     ```c#
-    // Setup the assistant chat
-    var history = new ChatHistory();
+    // Add system messages to the chat
     history.AddSystemMessage("The current date is 01/10/2025");
     history.AddSystemMessage("You are a helpful travel assistant.");
     history.AddSystemMessage("Before providing destination recommendations, ask the user about their budget.");
@@ -237,7 +241,7 @@ lab:
 
     ```output
     1. Can you give me some destination recommendations for Europe?
-    2. I want to go to Barcelona, can you create an itenerary for me?
+    2. I want to go to Barcelona, can you create an itinerary for me?
     3. How many Euros is 100 USD?
     4. Can you book me a flight to Barcelona?
     ```
@@ -246,7 +250,7 @@ lab:
 
 ## 연습 3: 작업에 대한 사용자 동의 필요
 
-이 연습에서는 에이전트가 사용자를 대신하여 항공편을 예약하기 전에 사용자의 승인을 요청하는 필터 호출 함수를 추가합니다. 그럼 시작하겠습니다.
+이 연습에서는 도우미가 사용자를 대신하여 항공편을 예약하도록 허용하기 전에 사용자의 승인을 요청하는 필터 호출 기능을 추가합니다. 그럼 시작하겠습니다.
 
 ### 작업 1: 함수 호출 필터 만들기
 
@@ -262,7 +266,9 @@ lab:
     {
         public async Task OnFunctionInvocationAsync(FunctionInvocationContext context, Func<FunctionInvocationContext, Task> next)
         {
+            // Check the plugin and function names
             
+            await next(context);
         }
     }
     ```
@@ -270,17 +276,18 @@ lab:
     >[!NOTE] 
     > 의미 체계 커널 SDK의 버전 1.30.0에서는 함수 필터가 변경될 수 있으며 경고 표시 안 됨이 필요합니다. 
 
-    이 코드에서는 `IFunctionInvocationFilter` 인터페이스를 구현합니다. 이 `OnFunctionInvocationAsync` 메서드는 AI 에이전트에서 함수를 호출할 때마다 항상 호출됩니다.
+    이 코드에서는 `IFunctionInvocationFilter` 인터페이스를 구현합니다. 이 `OnFunctionInvocationAsync` 메서드는 AI 도우미에서 함수를 호출할 때마다 항상 호출됩니다.
 
 1. 다음 코드를 추가하여 함수가 `book_flight` 호출되는 시기를 검색합니다.
 
     ```c#
-    if ((context.Function.PluginName == "FlightBooking" && context.Function.Name == "book_flight"))
+    // Check the plugin and function names
+    if ((context.Function.PluginName == "FlightBookingPlugin" && context.Function.Name == "book_flight"))
     {
-    
-    }
+        // Request user approval
 
-    await next(context);
+        // Proceed if approved
+    }
     ```
 
     이 코드는 `FunctionInvocationContext`을(를) 사용하여 어떤 플러그 인과 함수가 호출되었는지 확인합니다.
@@ -288,29 +295,25 @@ lab:
 1. 항공편을 예약하기 위한 사용자의 허가를 요청하려면 다음 논리를 추가합니다.
 
     ```c#
-    if ((context.Function.PluginName == "FlightBooking" && context.Function.Name == "book_flight"))
+    // Request user approval
+    Console.WriteLine("System Message: The assistant requires an approval to complete this operation. Do you approve (Y/N)");
+    Console.Write("User: ");
+    string shouldProceed = Console.ReadLine()!;
+
+    // Proceed if approved
+    if (shouldProceed != "Y")
     {
-        Console.WriteLine("System Message: The agent requires an approval to complete this operation. Do you approve (Y/N)");
-        Console.Write("User: ");
-        string shouldProceed = Console.ReadLine()!;
-
-        if (shouldProceed != "Y")
-        {
-            context.Result = new FunctionResult(context.Result, "The operation was not approved by the user");
-            return;
-        }
+        context.Result = new FunctionResult(context.Result, "The operation was not approved by the user");
+        return;
     }
-
-    await next(context);
     ```
 
 1. **Program.cs** 파일로 이동합니다.
 
-1. 다음 코드를 사용하여 커널에 권한 필터를 추가합니다.
+1. **커널에 필터 추가** 주석 아래에 다음 코드를 추가합니다.
 
     ```c#
-    kernel.ImportPluginFromType<CurrencyConverterPlugin>();
-    kernel.ImportPluginFromType<FlightBookingPlugin>();
+    // Add filters to the kernel
     kernel.FunctionInvocationFilters.Add(new PermissionFilter());
     ```
 
@@ -322,12 +325,12 @@ lab:
     User: Find me a flight to Tokyo on the 19
     Assistant: I found a flight to Tokyo on the 19th of January. The flight is with Air Japan and the price is $1200.
     User: Y
-    System Message: The agent requires an approval to complete this operation. Do you approve (Y/N)
+    System Message: The assistant requires an approval to complete this operation. Do you approve (Y/N)
     User: N
     Assistant: I'm sorry, but I am unable to book the flight for you.
     ```
 
-    에이전트는 예약을 진행하기 전에 사용자 승인을 받아야 합니다.
+    도우미는 예약을 진행하기 전에 사용자의 승인을 받아야 합니다.
 
 ### 검토
 
