@@ -4,14 +4,14 @@ lab:
   module: 'Module 01: Build your kernel'
 ---
 
-# 랩: AI 음악 추천 에이전트 만들기
+# 랩: AI 음악 추천 도우미 만들기
 # 학생용 랩 매뉴얼
 
-이 랩에서는 사용자의 음악 라이브러리를 관리하고 개인 맞춤 음악과 콘서트 추천을 제공할 수 있는 AI 에이전트를 위한 코드를 만듭니다. 의미 체계 커널 SDK를 사용하여 AI 에이전트를 빌드하고 LLM(대규모 언어 모델) 서비스에 연결합니다. 의미 체계 커널 SDK를 사용하면 LLM 서비스와 상호 작용하고 사용자 맞춤 추천을 제공할 수 있는 스마트 애플리케이션을 만들 수 있습니다.
+이 랩에서는 사용자의 음악 라이브러리를 관리하고 개인에게 맞는 노래 및 콘서트 추천을 제공할 수 있는 AI 도우미를 위한 코드를 만듭니다. 의미 체계 커널 SDK를 사용하여 AI 도우미를 빌드하고 LLM(대규모 언어 모델) 서비스에 연결합니다. 의미 체계 커널 SDK를 사용하면 LLM 서비스와 상호 작용하고 사용자 맞춤 추천을 제공할 수 있는 스마트 애플리케이션을 만들 수 있습니다.
 
 ## 랩 시나리오
 
-여러분은 국제 오디오 스트리밍 서비스의 개발자입니다. 서비스를 AI와 통합하여 사용자 맞춤이 더 잘 구현된 환경을 제공하는 임무를 맡았습니다. AI는 사용자의 청취 기록과 선호도를 기반으로 음악 및 예정된 아티스트 콘서트를 추천할 수 있어야 합니다. 의미 체계 커널 SDK를 사용하여 LLM(대규모 언어 모델) 서비스와 상호 작용할 수 있는 AI 에이전트를 빌드하기로 합니다.
+여러분은 국제 오디오 스트리밍 서비스의 개발자입니다. 서비스를 AI와 통합하여 사용자 맞춤이 더 잘 구현된 환경을 제공하는 임무를 맡았습니다. AI는 사용자의 청취 기록과 선호도를 기반으로 음악 및 예정된 아티스트 콘서트를 추천할 수 있어야 합니다. 의미 체계 커널 SDK를 사용하여 LLM(대규모 언어 모델) 서비스와 상호 작용할 수 있는 AI 도우미를 빌드하기로 합니다.
 
 ## 목표
 
@@ -121,20 +121,25 @@ lab:
     using Microsoft.SemanticKernel.Connectors.OpenAI;
     ```
 
-1. 커널을 생성하려면 **Program.cs** 파일에 다음 코드를 추가합니다.
-    
+1. **Create a kernel builder with Azure OpenAI chat completion** 주석 아래에 다음 코드를 추가합니다.
+
     ```c#
     // Create a kernel builder with Azure OpenAI chat completion
     var builder = Kernel.CreateBuilder();
     builder.AddAzureOpenAIChatCompletion(modelId, endpoint, apiKey);
+    ```
 
+1. **Build the kernel** 주석 아래에 이 코드를 추가하여 커널을 빌드합니다.
+
+    ```c#
     // Build the kernel
     var kernel = builder.Build();
     ```
 
-1. 다음 코드를 입력하여 커널과 엔드포인트가 작동하는지 테스트합니다.
+1. **Verify the endpoint and run a prompt** 주석 아래에 다음 코드를 추가합니다.
 
     ```c#
+    // Verify the endpoint and run a prompt
     var result = await kernel.InvokePromptAsync("Who are the top 5 most famous musicians in the world?");
     Console.WriteLine(result);
     ```
@@ -147,6 +152,8 @@ lab:
 
     응답은 커널에 전달한 Azure Open AI 모델에서 제공됩니다. 의미 체계 커널 SDK는 LLM(대규모 언어 모델)에 연결하고 프롬프트를 실행할 수 있습니다. LLM으로부터 얼마나 빨리 응답을 받을 수 있었는지 확인합니다. 의미 체계 커널 SDK를 사용하면 스마트 애플리케이션을 쉽고 효율적으로 빌드할 수 있습니다.
 
+응답을 확인한 뒤에는 확인 코드를 제거할 수 있습니다.
+
 ## 연습 2: 사용자 지정 음악 라이브러리 플러그 인 만들기
 
 이 연습에서는 음악 라이브러리에 대한 사용자 지정 플러그 인을 만듭니다. 사용자의 최근 재생 목록에 노래를 추가하고, 최근 재생 노래 목록을 가져오고, 개인 맞춤 노래 추천을 제공할 수 있는 함수를 만듭니다. 또한 사용자의 위치와 최근 재생 노래를 기반으로 콘서트를 제안하는 함수를 만듭니다.
@@ -157,149 +164,101 @@ lab:
 
 이 작업에서는 사용자의 최근 재생 목록에 노래를 추가하고 최근 재생 노래 목록을 가져올 수 있는 플러그 인을 만듭니다. 간단히 하기 위해 최근에 재생한 노래는 텍스트 파일에 저장됩니다.
 
-1. **Plugins** 폴더에 **MusicLibraryPlugin.cs** 파일을 새로 만듭니다.
+1. **Plugins** 폴더에서 **MusicLibraryPlugin.cs** 파일을 엽니다.
 
-    먼저 사용자의 "최근 재생" 목록에 노래를 가져오고 추가하는 몇 가지 빠른 함수를 만듭니다.
+1. **Create a kernel function to get recently played songs** 주석 아래에 커널 함수 데코레이터를 추가합니다.
 
-1. 다음 코드를 입력합니다.
 
     ```c#
-    using System.Text.Json;
-    using System.Text.Json.Nodes;
-    using Microsoft.SemanticKernel;
-
-    public class MusicLibraryPlugin
-    {
-        [KernelFunction("GetRecentPlays")]
-        public static string GetRecentPlays()
-        {
-            string content = File.ReadAllText($"Files/RecentlyPlayed.txt");
-            return content;
-        }
-    }
+    // Create a kernel function to get recently played songs
+    [KernelFunction("GetRecentPlays")]
+    public static string GetRecentPlays()
     ```
 
-    이 코드에서는 `KernelFunction` 데코레이터를 사용하여 네이티브 함수를 선언합니다. AI가 함수를 올바르게 호출할 수 있도록 함수에 설명이 포함된 이름을 사용합니다. 사용자의 최근 재생 목록은 'RecentlyPlayed.txt'라는 텍스트 파일에 저장됩니다. 다음으로 목록에 노래를 추가하는 코드를 추가할 수 있습니다.
+    `KernelFunction` 데코레이터는 네이티브 함수를 선언합니다. AI가 함수를 올바르게 호출할 수 있도록 함수에 설명이 포함된 이름을 사용합니다. 사용자의 최근 재생 목록은 'RecentlyPlayed.txt'라는 텍스트 파일에 저장됩니다.
 
-1. `MusicLibraryPlugin` 클래스에 다음 코드를 추가합니다.
+1. **Create a kernel function to add a song to the recently played list** 주석 아래에 커널 함수 데코레이터를 추가합니다.
 
     ```c#
+    // Create a kernel function to add a song to the recently played list
     [KernelFunction("AddToRecentPlays")]
     public static string AddToRecentlyPlayed(string artist,  string song, string genre)
-    {
-        // Read the existing content from the file
-        string filePath = "Files/RecentlyPlayed.txt";
-        string jsonContent = File.ReadAllText(filePath);
-        var recentlyPlayed = (JsonArray) JsonNode.Parse(jsonContent)!;
-
-        var newSong = new JsonObject
-        {
-            ["title"] = song,
-            ["artist"] = artist,
-            ["genre"] = genre
-        };
-
-        // Insert the new song
-        recentlyPlayed.Insert(0, newSong);
-        File.WriteAllText(filePath, JsonSerializer.Serialize(recentlyPlayed,
-            new JsonSerializerOptions { WriteIndented = true }));
-
-        return $"Added '{song}' to recently played";
-    }
     ```
 
-    이 코드에서는 아티스트, 노래, 장르를 문자열로 받아들이는 함수를 만듭니다. 'RecentlyPlayed.txt' 파일에는 사용자가 최근에 재생한 노래의 json 형식 목록이 포함되어 있습니다. 이 코드는 파일에서 기존 콘텐츠를 읽고 구문 분석한 후 새 노래를 목록에 추가합니다. 그런 다음 업데이트된 목록이 파일에 다시 기록됩니다.
+    이제 이 플러그인 클래스가 커널에 추가되면 함수를 식별하고 호출할 수 있습니다.
 
-1. **Program.cs** 파일을 다음 코드로 업데이트합니다.
+1. **Program.cs** 파일로 이동합니다.
+
+1. **Import plugins to the kernel** 아래에 다음 코드를 추가합니다.
 
     ```c#
-    var kernel = builder.Build();
+    // Import plugins to the kernel
     kernel.ImportPluginFromType<MusicLibraryPlugin>();
+    ```
 
+1. **Create prompt execution settings** 주석 아래에 다음 코드를 추가하여 함수를 자동으로 호출합니다.
+
+    ```c#
+    // Create prompt execution settings
+    OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new() 
+    {
+        FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
+    };
+    ```
+
+    이 설정을 사용하면 프롬프트에서 함수를 지정할 필요 없이 커널이 함수를 자동으로 호출할 수 있습니다.
+
+1. **Get chat completion service** 주석 아래에 다음 코드를 추가합니다.
+
+    ```c#
     // Get chat completion service.
     var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
-
-    // Create a chat history object
     ChatHistory chatHistory = [];
     ```
 
-    이 코드에서는 플러그 인을 커널로 가져오고 채팅 완료를 위한 설정을 추가합니다.
-
-1. 다음 프롬프트를 추가하여 플러그 인을 호출합니다.
+1. **Create a helper function to await and output the reply from the chat completion service** 주석 아래에 다음 코드를 추가합니다.
 
     ```c#
+    // Create a helper function to await and output the reply from the chat completion service
+    async Task GetAssistantReply() {
+        ChatMessageContent reply = await chatCompletionService.GetChatMessageContentAsync(
+            chatHistory,
+            kernel: kernel,
+            executionSettings: openAIPromptExecutionSettings
+        );
+        chatHistory.AddAssistantMessage(reply.ToString());
+        Console.WriteLine(reply.ToString());
+    }
+    ```
+
+
+1. **Add system messages to the chat** 주석 아래에 다음 코드를 추가합니다.
+
+    ```c#
+    // Add system messages to the chat
     chatHistory.AddSystemMessage("When a user has played a song, add it to their list of recent plays.");
     chatHistory.AddSystemMessage("The listener has just played the song Danse by Tiara. It falls under these genres: French pop, electropop, pop.");
-
-    ChatMessageContent reply = await chatCompletionService.GetChatMessageContentAsync(
-        chatHistory,
-        kernel: kernel
-    );
-    Console.WriteLine(reply.ToString());
-    chatHistory.AddAssistantMessage(reply.ToString());
+    await GetAssistantReply();
     ```
 
 1. 터미널에 `dotnet run`을 입력하여 코드를 실행합니다.
 
-    다음과 같은 출력이 표시됩니다.
+    추가한 시스템 메시지 프롬프트가 플러그인 함수를 호출하여 다음 출력이 표시되어야 합니다.
 
     ```output
     Added 'Danse' to recently played
     ```
 
-    'Files/RecentlyPlayed.txt,'를 열면 목록에 새 노래가 추가된 것을 볼 수 있습니다.
+    **Files/RecentlyPlayed.txt**를 열면 목록에 새 노래가 추가된 것을 볼 수 있습니다.
 
 ### 작업 2: 개인 맞춤 노래 추천 제공
 
 이 작업에서는 최근에 재생한 노래를 기반으로 사용자 맞춤 노래 추천을 제공하는 프롬프트를 만듭니다. 프롬프트는 네이티브 함수를 결합하여 노래 추천을 생성합니다. 또한 프롬프트에서 함수를 만들어 다시 사용할 수 있도록 합니다.
 
-1. **MusicLibraryPlugin.cs** 파일에 다음 함수를 추가합니다.
+1. **Program.cs** 파일의 **Create a song suggester function using a prompt** 주석 아래에 다음 코드를 추가합니다.
 
     ```c#
-    [KernelFunction("GetMusicLibrary")]
-    public static string GetMusicLibrary()
-    {
-        string dir = Directory.GetCurrentDirectory();
-        string content = File.ReadAllText($"Files/MusicLibrary.txt");
-        return content;
-    }
-    ```
-
-    이 함수는 'MusicLibrary.txt'라는 파일에서 사용 가능한 음악 목록을 읽습니다. 파일에는 사용자가 사용할 수 있는 json 형식의 노래 목록이 포함되어 있습니다.
-
-1. **Program.cs** 파일을 다음 코드로 업데이트합니다.
-
-    ```c#
-    chatHistory.AddSystemMessage("When a user has played a song, add it to their list of recent plays.");
-    
-    string prompt = @"This is a list of music available to the user:
-        {{MusicLibraryPlugin.GetMusicLibrary}} 
-
-        This is a list of music the user has recently played:
-        {{MusicLibraryPlugin.GetRecentPlays}}
-
-        Based on their recently played music, suggest a song from
-        the list to play next";
-
-    var result = await kernel.InvokePromptAsync(prompt);
-    Console.WriteLine(result);
-    ```
-
-    먼저 목록에 노래를 추가하는 코드를 제거할 수 있습니다. 그런 다음 네이티브 플러그 인 함수를 의미 체계 프롬프트와 결합합니다. 네이티브 함수는 LLM(대규모 언어 모델)이 자체적으로 액세스할 수 없는 사용자 데이터를 검색할 수 있으며, LLM은 텍스트 입력을 기반으로 권장하는 노래를 생성할 수 있습니다.
-
-1. 코드를 테스트하려면 터미널에 `dotnet run`을 입력합니다.
-
-    다음 출력과 유사한 응답이 표시됩니다.
-
-    ```output 
-    Based on the user's recently played music, a suggested song to play next could be "Sabry Aalil" by Yasemin since the user seems to enjoy pop and Egyptian pop music.
-    ```
-
-    >[!NOTE] 권장하는 노래는 여기에 표시된 노래와 다를 수 있습니다.
-
-1. 프롬프트에서 함수를 만들도록 코드를 수정합니다.
-
-    ```c#
+    // Create a song suggester function using a prompt
     var songSuggesterFunction = kernel.CreateFunctionFromPrompt(
         promptTemplate: @"This is a list of music available to the user:
         {{MusicLibraryPlugin.GetMusicLibrary}} 
@@ -318,42 +277,32 @@ lab:
 
     이 코드에서는 프롬프트에서 함수를 만들고 커널 플러그 인에 추가합니다.
 
-1. 다음 코드를 추가하여 함수를 자동으로 호출합니다.
+1. **Invoke the song suggester function with a prompt from the user*** 주석 아래에 다음 코드를 추가합니다.
 
     ```c#
-    OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new() 
-    {
-        FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
-    };
-
+    // Invoke the song suggester function with a prompt from the user
     chatHistory.AddUserMessage("What song should I play next?");
-
-    reply = await chatCompletionService.GetChatMessageContentAsync(
-        chatHistory,
-        kernel: kernel,
-        executionSettings: openAIPromptExecutionSettings
-    );
-    Console.WriteLine(reply.ToString());
-    chatHistory.AddAssistantMessage(reply.ToString());
+    await GetAssistantReply();
     ```
 
-    이 코드에서는 자동 함수 호출을 사용하도록 설정하는 설정을 만듭니다. 그런 다음 함수를 호출하고 회신을 검색하는 프롬프트를 추가합니다.
+    이제 애플리케이션은 사용자의 요청에 따라 플러그인 함수를 자동으로 호출할 수 있습니다. 이 코드를 확장해 사용자의 정보를 기반으로 콘서트 추천을 제공하도록 만들어 보겠습니다.
 
 ### 작업 3: 맞춤형 콘서트 추천 제공
 
 이 작업에서는 사용자의 최근 재생한 노래와 위치를 기반으로 콘서트를 추천하도록 LLM에 요청하는 플러그 인을 만듭니다.
 
-1. **Program.cs** 파일에서 음악 콘서트 플러그 인을 커널에 추가합니다.
+1. **Program.cs** 파일의 **Import plugins to the kernel** 주석 아래에서 콘서트 플러그인을 가져옵니다.
 
     ```c#
-    var kernel = builder.Build();    
+    // Import plugins to the kernel 
     kernel.ImportPluginFromType<MusicLibraryPlugin>();
     kernel.ImportPluginFromType<MusicConcertsPlugin>();
     ```
 
-1. 프롬프트에서 함수를 만드는 코드를 추가합니다.
+1. **Create a concert suggester function using a prompt** 주석 아래에 다음 코드를 추가합니다.
 
     ```c#
+    // Create a concert suggester function using a prompt
     var concertSuggesterFunction = kernel.CreateFunctionFromPrompt(
         promptTemplate: @"This is a list of the user's recently played songs:
         {{MusicLibraryPlugin.GetRecentPlays}}
@@ -376,15 +325,9 @@ lab:
 1. 다음 프롬프트를 추가하여 새 플러그 인 함수를 호출합니다.
 
     ```c#
+    // Invoke the concert suggester function with a prompt from the user
     chatHistory.AddUserMessage("Can you recommend a concert for me? I live in Washington");
-
-    reply = await chatCompletionService.GetChatMessageContentAsync(
-        chatHistory,
-        kernel: kernel,
-        executionSettings: openAIPromptExecutionSettings
-    );
-    Console.WriteLine(reply.ToString());
-    chatHistory.AddAssistantMessage(reply.ToString());
+    await GetAssistantReply();
     ```
 
 1. 터미널에서 `dotnet run`를 입력합니다.
@@ -397,8 +340,8 @@ lab:
     
     LLM의 응답은 다를 수 있습니다. 프롬프트와 위치를 조정하여 어떤 다른 결과를 얻을 수 있는지 확인해 보세요.
 
-이제 에이전트가 사용자의 입력에 따라 자동으로 다양한 작업을 수행할 수 있습니다. 잘했습니다!
+이제 도우미가 사용자의 입력에 따라 자동으로 다양한 작업을 수행할 수 있습니다. 잘했습니다!
 
 ### 검토
 
-이 랩에서는 사용자의 음악 라이브러리를 관리하고 개인 맞춤 노래 및 콘서트 추천을 제공할 수 있는 AI 에이전트를 만들었습니다. 의미 체계 커널 SDK를 사용하여 AI 에이전트를 빌드하고 LLM(대규모 언어 모델) 서비스에 연결했습니다. 음악 라이브러리를 위한 사용자 지정 플러그 인을 만들고 자동 함수 호출을 사용하도록 설정하여 에이전트가 사용자의 입력에 동적으로 응답하도록 했습니다. 축하합니다. 랩을 완료했습니다.
+이 랩에서는 사용자의 음악 라이브러리를 관리하고 개인에게 맞는 노래 및 콘서트 추천을 제공할 수 있는 AI 도우미를 만들었습니다. 의미 체계 커널 SDK를 사용하여 AI 도우미를 빌드하고 LLM(대규모 언어 모델) 서비스에 연결했습니다. 음악 라이브러리를 위한 사용자 지정 플러그인을 만들고 자동 함수 호출을 사용하도록 설정하여 도우미가 사용자의 입력에 동적으로 응답하도록 했습니다. 축하합니다. 랩을 완료했습니다.
