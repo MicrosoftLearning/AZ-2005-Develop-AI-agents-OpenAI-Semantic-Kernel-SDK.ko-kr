@@ -189,7 +189,7 @@ lab:
 
 1. **Program.cs** 파일로 이동합니다.
 
-1. **Import plugins to the kernel** 아래에 다음 코드를 추가합니다.
+1. **Import plugins to the kernel** 주석 아래에 다음 코드를 추가합니다.
 
     ```c#
     // Import plugins to the kernel
