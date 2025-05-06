@@ -1,11 +1,14 @@
 ---
 lab:
-  title: 의미 체계 커널 SDK를 사용하여 Devops 도우미 만들기
+  title: 의미 체계 커널을 사용하여 AI 도우미 만들기
+  description: 의미 체계 커널을 사용하여 DevOps 작업을 수행할 수 있는 생성형 AI 도우미를 빌드하는 방법을 알아봅니다.
 ---
 
-# 의미 체계 커널 SDK를 사용하여 Devops 도우미 만들기
+# 의미 체계 커널을 사용하여 AI 도우미 만들기
 
-이 랩에서는 TODO인 AI 도우미에 대한 코드를 만듭니다. 의미 체계 커널 SDK를 사용하여 AI 도우미를 빌드하고 LLM(대규모 언어 모델) 서비스에 연결합니다. 의미 체계 커널 SDK를 사용하면 LLM 서비스와 상호 작용하고 사용자 맞춤 추천을 제공할 수 있는 스마트 애플리케이션을 만들 수 있습니다.
+이 랩에서는 개발 작업을 자동화하고 작업을 간소화하도록 설계된 AI 기반 도우미에 대한 코드를 개발합니다. 의미 체계 커널 SDK를 사용하여 AI 도우미를 빌드하고 LLM(대규모 언어 모델) 서비스에 연결합니다. 의미 체계 커널 SDK를 사용하면 LLM 서비스와 상호 작용하고, 자연어 쿼리에 응답하며, 사용자에게 맞춤형 인사이트를 제공할 수 있는 스마트 애플리케이션을 만들 수 있습니다. 이 연습에서는 일반적인 devops 작업을 나타내기 위해 모의 함수가 제공됩니다. 그럼 시작하겠습니다.
+
+이 연습에는 약 **30**분이 소요됩니다.
 
 ## 채팅 완료 모델 배포
 
@@ -457,6 +460,7 @@ lab:
 
     **Python**
     ```python
+    # Create a function filter
     async def permission_filter(context: FunctionInvocationContext, next: Callable[[FunctionInvocationContext], Awaitable[None]]) -> None:
         await next(context)
         result = context.result
