@@ -1,3 +1,5 @@
+**⚠️ This GitHub repo will retire on 28th November 2025.** 
+
 # Azure OpenAI 및 의미 체계 커널 SDK를 사용하여 생성형 AI 솔루션 개발
 
 이 리포지토리의 연습은 개발자가 의미 체계 커널 및 Azure OpenAI를 사용하여 생성형 AI 솔루션을 빌드할 때 수행하는 일반적인 작업을 탐색하는 실습 학습 환경을 제공하도록 설계되었습니다.
