@@ -14,23 +14,29 @@ lab:
 
 1. [https://portal.azure.com](https://portal.azure.com)으로 이동합니다.
 
-1. 기본 설정을 사용하여 새 Azure OpenAI 리소스를 만듭니다.
+1. 기본 설정을 사용하여 새 **Azure OpenAI** 리소스를 만듭니다.
 
 1. 리소스가 생성되면 **리소스로 이동**을 선택합니다.
 
 1. **개요** 페이지에서 **Azure Foundry 포털로 이동**을 선택합니다.
 
-1. **새 배포 만들기**를 선택한 다음 **기본 모델에서** 선택합니다.
+    새 탭에서 Azure AI Foundry 포털이 열립니다.
 
-1. 모델 목록에서 **gpt-4o**를 검색한 후 선택하고 확인합니다.
+1. 왼쪽 탐색 창에서 **배포**를 선택합니다.
 
-1. 배포의 이름을 입력하고 기본 옵션을 그대로 둡니다.
+1. **모델 배포**를 선택한 다음, **기본 모델 배포**를 선택합니다.
 
-1. 배포가 완료되면 Azure Portal에서 Azure OpenAI 리소스로 다시 이동합니다.
+1. 모델 목록에서 **gpt-4o**를 검색한 후 선택하고 **확인**을 선택합니다.
 
-1. **리소스 관리**에서 **키 및 엔드포인트**를 선택합니다.
+    Azure OpenAI 리소스에 대한 배포를 구성하는 대화 상자가 나타납니다.
 
-    다음 작업에서 여기에 있는 데이터를 사용하여 커널을 빌드합니다. 키를 안전하게 비공개로 유지해야 합니다!
+1. 설정을 검토하고 **배포**를 선택합니다.
+
+    배포가 완료되면 배포 상세 페이지가 나타납니다.
+
+1. **엔드포인트**에서 **대상 URI** 및 **키**를 관찰합니다.
+
+    다음 작업에서 여기에 있는 값을 사용하여 커널을 빌드합니다. 키를 비공개로 안전하게 유지해야 합니다!
 
 ## 애플리케이션 구성 준비
 
@@ -102,23 +108,25 @@ lab:
 
     코드 편집기에서 파일이 열립니다.
 
-1. Azure OpenAI Services 모델 ID, 엔드포인트 및 API 키로 값을 업데이트합니다.
+1. Azure OpenAI 모델 배포의 값을 업데이트합니다.
 
     **Python**
     ```python
-    MODEL_DEPLOYMENT=""
-    BASE_URL=""
+    MODEL_ENDPOINT=""
     API_KEY="
+    MODEL_DEPLOYMENT_NAME=""
     ```
 
     **C#**
     ```json
     {
-        "modelName": "",
-        "endpoint": "",
-        "apiKey": ""
+        "openai_endpoint": "",
+        "api_key": "",
+        "model_deployment_name": "",
     }
     ```
+
+> **참고**: C#을 사용하는 경우 `openai_endpoint` 값에 대한 리소스의 **홈**페이지에서 **Azure OpenAI** 엔드포인트 URL을 사용합니다.
 
 1. 값을 업데이트한 후 **Ctrl+S** 명령을 사용하여 변경 내용을 저장한 다음, Cloud Shell 명령줄을 열어 둔 채 **Ctrl+Q** 명령을 사용하여 코드 편집기를 닫습니다.
 
@@ -143,9 +151,9 @@ lab:
     # Create a kernel builder with Azure OpenAI chat completion
     kernel = Kernel()
     chat_completion = AzureChatCompletion(
-        deployment_name=deployment_name,
+        deployment_name=model_name,
         api_key=api_key,
-        base_url=base_url,
+        base_url=endpoint,
     )
     kernel.add_service(chat_completion)
     ```
@@ -153,11 +161,11 @@ lab:
      ```c#
     // Create a kernel builder with Azure OpenAI chat completion
     var builder = Kernel.CreateBuilder();
-    builder.AddAzureOpenAIChatCompletion(modelId, endpoint, apiKey);
+    builder.AddAzureOpenAIChatCompletion(modelName, endpoint, apiKey);
     var kernel = builder.Build();
     ```
 
-1. 파일 아래쪽에서 **Create a kernel function to build the stage environment** 주석을 찾고 다음 코드를 추가하여 스테이징 환경을 빌드할 모의 플러그인 기능을 만듭니다.
+1. 파일 아래쪽에 있는 **DevopsPlugin** 클래스에서 **스테이지 환경을 빌드하는 커널 함수 만들기** 주석을 찾고 다음 코드를 추가하여 스테이징 환경을 빌드할 모의 플러그 인 기능을 만듭니다.
 
     **Python**
     ```python
@@ -179,7 +187,7 @@ lab:
 
     `KernelFunction` 데코레이터는 네이티브 함수를 선언합니다. AI가 함수를 올바르게 호출할 수 있도록 함수에 설명이 포함된 이름을 사용합니다. 
 
-1. **Import plugins to the kernel** 주석으로 이동하여 다음 코드를 추가합니다.
+1. **기본** 메서드에서 **커널에 플러그 인 가져오기** 주석으로 이동하고 다음 코드를 추가하여 완료한 플러그 인 클래스를 사용합니다.
 
     **Python**
     ```python
@@ -192,7 +200,6 @@ lab:
     // Import plugins to the kernel
     kernel.ImportPluginFromType<DevopsPlugin>();
     ```
-
 
 1. **Create prompt execution settings** 주석 아래에 다음 코드를 추가하여 함수를 자동으로 호출합니다.
 
@@ -334,7 +341,9 @@ lab:
     Assistant: The stage environment cannot be deployed because the earlier stage build failed due to unit test errors. Deploying a faulty build to stage may cause eventual issues and compromise the environment.
     ```
 
-    LLM의 응답은 다양할 수 있지만 여전히 스테이지 사이트를 배포할 수 없습니다.
+    LLM의 응답은 다양할 수 있지만 여전히 스테이지 사이트를 배포할 수 없습니다. 
+    
+1. <kbd>ENTER</kbd> 키를 눌러 프로그램을 종료합니다.
 
 ## Handlebars 프롬프트 만들기
 
@@ -454,6 +463,8 @@ lab:
     Assistant: The new branch `feature-login` has been successfully created from `main`.
     ```
 
+1. <kbd>ENTER</kbd> 키를 눌러 프로그램을 종료합니다.
+
 ## 작업에 대한 사용자 동의 필요
 
 1. 파일 아래쪽 근처에서 **Create a function filter** 주석을 찾아 다음 코드를 추가합니다.
@@ -506,9 +517,11 @@ lab:
 
     이 코드는 `FunctionInvocationContext` 개체를 사용하여 어떤 플러그 인과 함수가 호출되었는지 확인합니다.
 
-1. 항공편을 예약하기 위한 사용자의 허가를 요청하려면 다음 논리를 추가합니다.
+1. 작업을 진행하기 위한 사용자의 권한을 요청하려면 다음 논리를 추가합니다.
 
-     **Python**
+    올바른 들여쓰기 수준을 유지해야 합니다.
+
+    **Python**
     ```python
     # Request user approval
     print("System Message: The assistant requires approval to complete this operation. Do you approve (Y/N)")
@@ -573,6 +586,8 @@ lab:
     User: N
     Assistant: I'm sorry, but I am unable to proceed with the deployment.
     ```
+
+1. <kbd>ENTER</kbd> 키를 눌러 프로그램을 종료합니다.
 
 ### 검토
 
